@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -type f -name *.py)",
+      "Bash(python:*)",
+      "Bash(pip install:*)"
+    ]
+  }
+}

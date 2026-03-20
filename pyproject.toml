@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flaschen-taschen-py"
+version = "0.1.0"
+description = "Python port of FlaschenTaschen display control library"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Ported to Python", email = "contact@example.com"}
+]
+keywords = ["display", "led", "matrix", "flaschenTaschen"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Graphics",
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.10",
+    "black>=21.0",
+    "isort>=5.9",
+    "flake8>=3.9",
+]
+image = ["Pillow>=8.0"]
+video = ["ffmpeg-python>=0.2.1"]
+numpy = ["numpy>=1.20"]
+midi = ["mido>=1.2.9"]
+
+[project.urls]
+Homepage = "https://github.com/example/flaschen-taschen-py"
+Documentation = "https://github.com/example/flaschen-taschen-py/wiki"
+Repository = "https://github.com/example/flaschen-taschen-py"
+
+[tool.setuptools]
+packages = ["flaschen_taschen", "flaschen_taschen.client"]
+
+[tool.setuptools.package-data]
+flaschen_taschen = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --strict-markers"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+]
