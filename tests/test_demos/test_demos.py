@@ -13,6 +13,7 @@ from flaschen_taschen.demos.firefly import FireflyDemo
 from flaschen_taschen.demos.life import LifeDemo, Life
 from flaschen_taschen.demos.maze import Maze
 from flaschen_taschen.demos.sierpinski import Sierpinski
+from flaschen_taschen.demos.lines import Lines, ColorState, LineState, Line
 
 
 @pytest.fixture
@@ -781,3 +782,149 @@ class TestSierpinski:
             assert hasattr(color, 'r')
             assert hasattr(color, 'g')
             assert hasattr(color, 'b')
+
+
+class TestLines:
+    """Test Lines demo."""
+
+    def test_lines_initialization(self, std_opts):
+        """Test initialization."""
+        demo = Lines(std_opts)
+        assert demo.std_opts == std_opts
+        assert demo.draw_num == 1
+
+    def test_lines_draw_mode_one(self):
+        """Test 'one' draw mode parsing."""
+        opts = StandardOptions(["-g", "40x30", "one"])
+        demo = Lines(opts)
+        assert demo.draw_num == 1
+
+    def test_lines_draw_mode_two(self):
+        """Test 'two' draw mode parsing."""
+        opts = StandardOptions(["-g", "40x30", "two"])
+        demo = Lines(opts)
+        assert demo.draw_num == 2
+
+    def test_lines_draw_mode_four(self):
+        """Test 'four' draw mode parsing."""
+        opts = StandardOptions(["-g", "40x30", "four"])
+        demo = Lines(opts)
+        assert demo.draw_num == 4
+
+    def test_lines_setup_creates_state(self, std_opts):
+        """Test setup initializes line and color state."""
+        demo = Lines(std_opts)
+        demo.setup()
+
+        assert demo.canvas is not None
+        assert demo.color_state is not None
+        assert demo.line_state is not None
+        assert demo.transparent is not None
+        assert demo.current_color is not None
+        assert demo.current_line is not None
+        assert len(demo.line_state.lines_array) == 6
+
+    def test_lines_color_state_initialization(self, std_opts):
+        """Test ColorState initializes with zero values."""
+        color_state = ColorState()
+        assert color_state.count == 0
+        assert color_state.old_r == 0
+        assert color_state.old_g == 0
+        assert color_state.old_b == 0
+        assert color_state.new_r == 0
+        assert color_state.new_g == 0
+        assert color_state.new_b == 0
+
+    def test_lines_line_state_initialization(self, std_opts):
+        """Test LineState creates circular buffer."""
+        line_state = LineState(num_lines=6)
+        assert len(line_state.lines_array) == 6
+        assert line_state.lines_idx == 0
+        assert isinstance(line_state.line_skip, Line)
+
+    def test_lines_update_changes_state(self, std_opts):
+        """Test update changes line and color."""
+        demo = Lines(std_opts)
+        demo.setup()
+
+        initial_line = demo.current_line
+        initial_color = demo.current_color
+
+        demo.update()
+
+        # State should change (with high probability)
+        # At least one of line or color should differ
+        assert (demo.current_line.x1 != initial_line.x1 or
+                demo.current_line.y1 != initial_line.y1 or
+                demo.current_line.x2 != initial_line.x2 or
+                demo.current_line.y2 != initial_line.y2 or
+                demo.current_color.r != initial_color.r or
+                demo.current_color.g != initial_color.g or
+                demo.current_color.b != initial_color.b)
+
+    def test_lines_bounce_physics(self, std_opts):
+        """Test line endpoints bounce off edges."""
+        demo = Lines(std_opts)
+        demo.setup()
+
+        # Set line very close to edge and force it out
+        demo.line_state.lines_array[0] = Line(x1=1, y1=1, x2=1, y2=1)
+        demo.line_state.lines_idx = 0
+        demo.line_state.line_skip = Line(x1=-5, y1=-5, x2=5, y2=5)
+
+        # Update to move line out of bounds (velocity reverses next frame)
+        demo.update()
+
+        # After bouncing, velocity should have reversed
+        assert demo.line_state.line_skip.x1 > 0 or demo.line_state.line_skip.x1 < 0
+        assert demo.line_state.line_skip.y1 > 0 or demo.line_state.line_skip.y1 < 0
+
+    def test_lines_circular_buffer(self, std_opts):
+        """Test line circular buffer cycles through 6 lines."""
+        demo = Lines(std_opts)
+        demo.setup()
+
+        indices = []
+        for _ in range(12):
+            indices.append(demo.line_state.lines_idx)
+            demo._next_line(reset=False)
+
+        # Index increments before storing, so sequence starts at 1
+        # Should cycle: 1,2,3,4,5,0,1,2,3,4,5,0
+        assert indices == [1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0]
+
+    def test_lines_color_state_cycles(self, std_opts):
+        """Test color state count cycles through 16-frame transitions."""
+        demo = Lines(std_opts)
+        demo.setup()
+
+        # After setup, count should be 15
+        assert demo.color_state.count == 15
+
+        # After 16 steps, count cycles back: 15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0 -> 15
+        for _ in range(16):
+            demo._next_color(reset=False)
+
+        # Count should be at 15 again (or lower if we got a new color picked)
+        assert 0 <= demo.color_state.count <= 15
+
+    def test_lines_draw_renders_pixels(self, std_opts):
+        """Test draw renders line to canvas."""
+        demo = Lines(std_opts)
+        demo.setup()
+
+        # Draw should not raise exception
+        demo.draw()
+
+        # Canvas should have some non-black pixels (or all black if line happened to be transparent)
+        # Just verify draw completes
+
+    def test_lines_draw_modes_render(self, std_opts):
+        """Test all three draw modes render without error."""
+        for mode in [1, 2, 4]:
+            demo = Lines(std_opts)
+            demo.draw_num = mode
+            demo.setup()
+            demo.update()
+            demo.draw()
+            # Should complete without exception

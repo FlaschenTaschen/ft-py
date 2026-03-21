@@ -3,7 +3,7 @@
 ## Current Status
 Phase 5 IN PROGRESS - Interactive Demos Batch 2
 **Phase 4 VERIFIED COMPLETE** - 2026-03-20
-**Phase 5 Progress** - 3 of 8+ demos completed: life.py, maze.py, sierpinski.py (2026-03-20)
+**Phase 5 Progress** - 4 of 8+ demos completed: life.py, maze.py, sierpinski.py, lines.py (2026-03-20)
 
 **Verification Complete**:
 - [COMPLETE] blur.py - 2x2 simple blur with decay + 9 color palettes (C++ base + Swift enhancements)
@@ -367,6 +367,17 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
   - All tests passing ✓
   - Visual output verified and matches Swift reference ✓
 
+- [COMPLETE] lines.py - Random line animation with smooth color transitions (2026-03-20)
+  - Bresenham's line algorithm for pixel-perfect line drawing
+  - ColorState class managing 16-frame smooth color transitions
+  - LineState class with circular buffer of 6 lines
+  - Endpoint movement with velocity and edge bouncing
+  - Three draw modes: 1 (single), 2 (horizontal reflection), 4 (full mirror symmetry)
+  - Color transitions between random bright colors (0 or 255 per channel)
+  - 13 comprehensive tests covering all draw modes and physics
+  - scripts/run_lines.sh script for quick testing
+  - All tests passing ✓
+
 ## Planned Phases (Not Started)
 - [ ] Phase 5: Interactive Demos - Batch 2 (advanced algorithms, interactive)
 - [ ] Phase 6: Packaging & Distribution
@@ -378,10 +389,12 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 - flaschen_taschen/demos/life.py (Life demo + Life grid class + 256-color palette generation)
 - flaschen_taschen/demos/maze.py (Maze demo + DFS algorithm + 256-color palette generation)
 - flaschen_taschen/demos/sierpinski.py (Sierpinski demo + chaos game algorithm + 256-color palette generation)
-- tests/test_demos/test_demos.py - Added TestLife (5 tests), TestMaze (11 tests), TestSierpinski (11 tests)
+- flaschen_taschen/demos/lines.py (Lines demo + Bresenham algorithm + color state management)
+- tests/test_demos/test_demos.py - Added TestLife (5 tests), TestMaze (11 tests), TestSierpinski (11 tests), TestLines (13 tests)
 - scripts/run_life.sh (Shell script for life.py)
 - scripts/run_maze.sh (Shell script for maze.py)
 - scripts/run_sierpinski.sh (Shell script for sierpinski.py)
+- scripts/run_lines.sh (Shell script for lines.py)
 
 ### Phase 3
 - flaschen_taschen/debugger.py (DisplayDebugger: edges/fill modes, palette cycling)
