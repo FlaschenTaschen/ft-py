@@ -3,7 +3,7 @@
 ## Current Status
 Phase 5 IN PROGRESS - Interactive Demos Batch 2
 **Phase 4 VERIFIED COMPLETE** - 2026-03-20
-**Phase 5 Progress** - 4 of 8+ demos completed: life.py, maze.py, sierpinski.py, lines.py (2026-03-20)
+**Phase 5 Progress** - 5 of 8+ demos completed: life.py, maze.py, sierpinski.py, lines.py, fractal.py (2026-03-20)
 
 **Verification Complete**:
 - [COMPLETE] blur.py - 2x2 simple blur with decay + 9 color palettes (C++ base + Swift enhancements)
@@ -378,6 +378,18 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
   - scripts/run_lines.sh script for quick testing
   - All tests passing ✓
 
+- [COMPLETE] fractal.py - Mandelbrot set with smooth zoom animation (2026-03-20)
+  - Mandelbrot set computation with iteration counting (0-255)
+  - Dual-buffer system: 2x resolution computation buffer, display-resolution display buffer
+  - Smooth zoom animation with bilinear interpolation for smooth transitions
+  - Alternating zoom in/out every 38 zoom cycles
+  - FractalState class managing computation and display buffers
+  - 256-color palette animated with cosine-based color cycling
+  - Palette channels: Red (animated), Green (always 0), Blue (animated)
+  - 12 comprehensive tests covering computation, zooming, and palette animation
+  - scripts/run_fractal.sh script for quick testing
+  - All tests passing ✓
+
 ## Planned Phases (Not Started)
 - [ ] Phase 5: Interactive Demos - Batch 2 (advanced algorithms, interactive)
 - [ ] Phase 6: Packaging & Distribution
@@ -390,11 +402,13 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 - flaschen_taschen/demos/maze.py (Maze demo + DFS algorithm + 256-color palette generation)
 - flaschen_taschen/demos/sierpinski.py (Sierpinski demo + chaos game algorithm + 256-color palette generation)
 - flaschen_taschen/demos/lines.py (Lines demo + Bresenham algorithm + color state management)
-- tests/test_demos/test_demos.py - Added TestLife (5 tests), TestMaze (11 tests), TestSierpinski (11 tests), TestLines (13 tests)
+- flaschen_taschen/demos/fractal.py (Fractal demo + Mandelbrot computation + zoom animation)
+- tests/test_demos/test_demos.py - Added TestLife (5 tests), TestMaze (11 tests), TestSierpinski (11 tests), TestLines (13 tests), TestFractal (12 tests)
 - scripts/run_life.sh (Shell script for life.py)
 - scripts/run_maze.sh (Shell script for maze.py)
 - scripts/run_sierpinski.sh (Shell script for sierpinski.py)
 - scripts/run_lines.sh (Shell script for lines.py)
+- scripts/run_fractal.sh (Shell script for fractal.py)
 
 ### Phase 3
 - flaschen_taschen/debugger.py (DisplayDebugger: edges/fill modes, palette cycling)

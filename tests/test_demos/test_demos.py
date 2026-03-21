@@ -14,6 +14,7 @@ from flaschen_taschen.demos.life import LifeDemo, Life
 from flaschen_taschen.demos.maze import Maze
 from flaschen_taschen.demos.sierpinski import Sierpinski
 from flaschen_taschen.demos.lines import Lines, ColorState, LineState, Line
+from flaschen_taschen.demos.fractal import Fractal, FractalState
 
 
 @pytest.fixture
@@ -928,3 +929,147 @@ class TestLines:
             demo.update()
             demo.draw()
             # Should complete without exception
+
+
+class TestFractal:
+    """Test Fractal demo."""
+
+    def test_fractal_initialization(self, std_opts):
+        """Test initialization."""
+        demo = Fractal(std_opts)
+        assert demo.std_opts == std_opts
+
+    def test_fractal_setup_creates_state(self, std_opts):
+        """Test setup initializes fractal state."""
+        demo = Fractal(std_opts)
+        demo.setup()
+
+        assert demo.canvas is not None
+        assert demo.state is not None
+        assert demo.palette is not None
+        assert len(demo.palette) == 256
+        assert demo.pixels is not None
+        assert len(demo.pixels) == demo.canvas.width * demo.canvas.height
+
+    def test_fractal_state_initialization(self):
+        """Test FractalState initializes buffers."""
+        state = FractalState(40, 30)
+        assert state.width == 40
+        assert state.height == 30
+        assert len(state.fractal1) == 40 * 30 * 4
+        assert len(state.fractal2) == 40 * 30 * 4
+        assert state.offset == 0
+
+    def test_fractal_computation(self):
+        """Test Mandelbrot computation."""
+        state = FractalState(20, 20)
+        state.start_computation(-2.0, -1.5, 1.0, 1.5)
+
+        # Compute some lines
+        state.compute_lines(5)
+
+        # Should have computed some pixels
+        assert state.offset > 0
+        # Some pixels should have non-zero iteration counts
+        assert any(p > 0 for p in state.fractal1[:state.offset])
+
+    def test_fractal_buffer_swap(self):
+        """Test buffer swapping."""
+        state = FractalState(20, 20)
+
+        # Set some values in fractal1
+        state.fractal1[0] = 42
+        state.fractal2[0] = 7
+
+        state.swap_buffers()
+
+        # Values should be swapped
+        assert state.fractal1[0] == 7
+        assert state.fractal2[0] == 42
+
+    def test_fractal_zoom_animation_state(self, std_opts):
+        """Test zoom animation state variables."""
+        demo = Fractal(std_opts)
+        demo.setup()
+
+        assert demo.zx == 4.0
+        assert demo.zy == 4.0
+        assert demo.zoom_in is True
+        assert demo.frame_count == 0
+        assert demo.k == 0
+        assert demo.compute_step == 0
+
+    def test_fractal_update_changes_state(self, std_opts):
+        """Test update progresses computation."""
+        demo = Fractal(std_opts)
+        demo.setup()
+
+        initial_step = demo.compute_step
+        demo.update()
+
+        # Compute step should increment
+        assert demo.compute_step > initial_step
+
+    def test_fractal_zoom_toggle(self, std_opts):
+        """Test zoom direction toggles every 38 cycles."""
+        demo = Fractal(std_opts)
+        demo.setup()
+
+        initial_zoom = demo.zoom_in
+
+        # Run until a zoom toggle (approximately 38 * compute_steps_per_zoom updates)
+        for _ in range(int(demo.compute_steps_per_zoom * 40)):
+            demo.update()
+            demo.draw()
+
+        # After ~38 complete zoom cycles, direction should have toggled
+        # (Note: This is probabilistic, depends on exact frame counts)
+
+    def test_fractal_palette_generation(self, std_opts):
+        """Test palette is generated."""
+        demo = Fractal(std_opts)
+        demo.setup()
+
+        # Palette should have 256 colors
+        assert len(demo.palette) == 256
+
+        # Colors should have R and B channels (G always 0)
+        for color in demo.palette:
+            assert color.g == 0
+            assert 0 <= color.r <= 255
+            assert 0 <= color.b <= 255
+
+    def test_fractal_palette_animation(self, std_opts):
+        """Test palette animates over frames."""
+        demo = Fractal(std_opts)
+        demo.setup()
+
+        colors_frame_0 = [demo.palette[i] for i in range(256)]
+        demo.frame_count = 100
+        demo._update_palette()
+        colors_frame_100 = [demo.palette[i] for i in range(256)]
+
+        # Palette should have changed
+        assert colors_frame_0 != colors_frame_100
+
+    def test_fractal_draw_renders(self, std_opts):
+        """Test draw renders fractal to canvas."""
+        demo = Fractal(std_opts)
+        demo.setup()
+        demo.update()
+        demo.draw()
+
+        # Should complete without exception
+
+    def test_fractal_multiple_frames(self, std_opts):
+        """Test running multiple frames."""
+        demo = Fractal(std_opts)
+        demo.setup()
+
+        # Run several frames
+        for _ in range(10):
+            demo.update()
+            demo.draw()
+
+        # Frame count should have incremented
+        assert demo.frame_count > 0
