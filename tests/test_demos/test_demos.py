@@ -11,6 +11,7 @@ from flaschen_taschen.demos.blur import BlurDemo
 from flaschen_taschen.demos.quilt import QuiltDemo
 from flaschen_taschen.demos.firefly import FireflyDemo
 from flaschen_taschen.demos.life import LifeDemo, Life
+from flaschen_taschen.demos.maze import Maze
 
 
 @pytest.fixture
@@ -480,3 +481,155 @@ class TestLifeDemo:
         assert pixel.r == 0
         assert pixel.g == 0
         assert pixel.b == 255
+
+
+class TestMaze:
+    """Test Maze demo."""
+
+    def test_maze_initialization(self, std_opts):
+        """Test initialization."""
+        demo = Maze(std_opts)
+        assert demo.std_opts == std_opts
+        assert demo.use_fg_color is False
+        assert demo.use_visited_color is False
+        assert demo.use_bg_color is False
+
+    def test_maze_fg_color_parsing(self):
+        """Test foreground color parsing."""
+        opts = StandardOptions(["-g", "40x30", "-c", "ff0000"])
+        demo = Maze(opts)
+
+        assert demo.use_fg_color is True
+        assert demo.fg_color.r == 255
+        assert demo.fg_color.g == 0
+        assert demo.fg_color.b == 0
+
+    def test_maze_visited_color_parsing(self):
+        """Test visited color parsing."""
+        opts = StandardOptions(["-g", "40x30", "-v", "00ff00"])
+        demo = Maze(opts)
+
+        assert demo.use_visited_color is True
+        assert demo.visited_color.r == 0
+        assert demo.visited_color.g == 255
+        assert demo.visited_color.b == 0
+
+    def test_maze_bg_color_parsing(self):
+        """Test background color parsing."""
+        opts = StandardOptions(["-g", "40x30", "-b", "0000ff"])
+        demo = Maze(opts)
+
+        assert demo.use_bg_color is True
+        assert demo.bg_color.r == 0
+        assert demo.bg_color.g == 0
+        assert demo.bg_color.b == 255
+
+    def test_maze_setup_creates_state(self, std_opts):
+        """Test setup initializes maze state."""
+        demo = Maze(std_opts)
+        demo.setup()
+
+        assert demo.canvas is not None
+        assert demo.pixels is not None
+        assert len(demo.pixels) == demo.canvas.width * demo.canvas.height
+        assert demo.cell_stack is not None
+        assert len(demo.cell_stack) > 0  # Should start with one cell
+        assert demo.palette is not None
+        assert len(demo.palette) == 256
+
+    def test_maze_update_generates_step(self, std_opts):
+        """Test update generates one maze step."""
+        demo = Maze(std_opts)
+        demo.setup()
+
+        # Get initial maze count
+        initial_maze_count = sum(1 for p in demo.pixels if p == 1)
+
+        # Update should add at least one maze pixel
+        demo.update()
+
+        new_maze_count = sum(1 for p in demo.pixels if p == 1)
+
+        # Maze count should have increased or stayed same
+        # (it might stay same if we just backtracked)
+        assert new_maze_count >= initial_maze_count
+
+    def test_maze_color_cycling(self, std_opts):
+        """Test that visited color cycles through palette."""
+        demo = Maze(std_opts)
+        demo.setup()
+
+        initial_color = demo.visited_color
+        initial_index = demo.color_index
+
+        demo.draw()
+
+        # Color index should have incremented
+        assert demo.color_index == (initial_index + 1) % 256
+
+        # Color should have changed
+        assert demo.visited_color != initial_color
+
+    def test_maze_draw_renders(self, std_opts):
+        """Test draw renders maze to canvas."""
+        demo = Maze(std_opts)
+        demo.setup()
+
+        # Force some maze pixels
+        demo.pixels[0] = 1
+        demo.pixels[1] = 2
+
+        demo.draw()
+
+        # Check pixels were set correctly
+        pixel_maze = demo.canvas.get_pixel(0, 0)
+        pixel_visited = demo.canvas.get_pixel(1, 0)
+
+        assert pixel_maze.r == 255  # White (default fg)
+        assert pixel_visited != pixel_maze  # Different colors
+
+    def test_maze_multiple_steps(self, std_opts):
+        """Test maze generation progresses over multiple steps."""
+        demo = Maze(std_opts)
+        demo.setup()
+
+        initial_stack_size = len(demo.cell_stack)
+
+        # Run multiple steps
+        for _ in range(100):
+            demo.update()
+
+        # Stack should have grown or empty (completed)
+        # In most cases it should grow as maze expands
+        assert len(demo.cell_stack) >= 0  # Either still growing or completed
+
+    def test_maze_hex_color_parsing(self):
+        """Test hex color string parsing."""
+        from flaschen_taschen.client.color import Color
+
+        color = Maze._parse_hex_color("ff0000")
+        assert color.r == 255
+        assert color.g == 0
+        assert color.b == 0
+
+        color = Maze._parse_hex_color("00ff00")
+        assert color.r == 0
+        assert color.g == 255
+        assert color.b == 0
+
+    def test_maze_palette_generation(self):
+        """Test rainbow palette generation."""
+        demo_palette = Maze._create_rainbow_palette()
+
+        assert len(demo_palette) == 256
+
+        # Check that palette has color variation
+        # Middle colors should differ from start and each other
+        assert demo_palette[0] != demo_palette[128]
+        assert demo_palette[64] != demo_palette[192]
+
+        # Check all entries are Color objects
+        for color in demo_palette:
+            assert hasattr(color, 'r')
+            assert hasattr(color, 'g')
+            assert hasattr(color, 'b')

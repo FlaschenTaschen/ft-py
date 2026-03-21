@@ -329,7 +329,7 @@ ft-debugger -m fill -d 100 -t 5         # Fill with 100ms frame delay for 5s
 ## In Progress / Next Phase
 
 ### Phase 5 - Interactive Demos Batch 2 [IN PROGRESS]
-Implementing 8+ additional demos including sierpinski, maze, lines, random_dots, fractal, depth, and others.
+Implementing 8+ additional demos including sierpinski, lines, random_dots, fractal, depth, and others.
 
 **Completed:**
 - [COMPLETE] life.py - Conway's Game of Life with toroidal wrapping, respawn, and 256-color rainbow palette (2026-03-20)
@@ -340,7 +340,19 @@ Implementing 8+ additional demos including sierpinski, maze, lines, random_dots,
   - Custom foreground/background colors (`-c`/`-b` flags)
   - Initial population density control (`-n` flag)
   - 15 comprehensive tests (5 grid + 10 demo)
-  - run_life.sh script for quick testing
+  - scripts/run_life.sh script for quick testing
+  - All tests passing ✓
+
+- [COMPLETE] maze.py - Procedural maze generation using depth-first search (2026-03-20)
+  - Depth-first search with backtracking algorithm
+  - Animated maze generation showing generation and backtracking process
+  - 256-color rainbow palette for visited cell cycling
+  - Custom foreground/background colors (`-c`/`-v`/`-b` flags)
+  - 2x2 pixel cell grid representation
+  - 11 comprehensive tests
+  - scripts/run_maze.sh script for quick testing
+  - Script tested with geometry, colors, and all parameter combinations ✓
+  - All tests passing ✓
 
 ## Planned Phases (Not Started)
 - [ ] Phase 5: Interactive Demos - Batch 2 (advanced algorithms, interactive)
@@ -351,7 +363,10 @@ Implementing 8+ additional demos including sierpinski, maze, lines, random_dots,
 
 ### Phase 5
 - flaschen_taschen/demos/life.py (Life demo + Life grid class + 256-color palette generation)
-- tests/test_demos/test_demos.py - Added TestLife (5 tests) and TestLifeDemo (10 tests)
+- flaschen_taschen/demos/maze.py (Maze demo + DFS algorithm + 256-color palette generation)
+- tests/test_demos/test_demos.py - Added TestLife (15 tests) and TestMaze (11 tests)
+- scripts/run_life.sh (Shell script for life.py)
+- scripts/run_maze.sh (Shell script for maze.py)
 
 ### Phase 3
 - flaschen_taschen/debugger.py (DisplayDebugger: edges/fill modes, palette cycling)
@@ -397,7 +412,7 @@ Implementing 8+ additional demos including sierpinski, maze, lines, random_dots,
 When context is cleared, read this file to determine where to resume work. Look for the current phase and incomplete items to continue from that point.
 
 ## Blockers / Issues
-None currently. Ready to start Phase 5.
+None currently. Phase 5 in progress - 2 of 8+ demos completed (life, maze).
 
 ## Notes
 - Swift code is primary reference; C++ as fallback
