@@ -22,8 +22,8 @@ class TestPPMFormatter:
         # Verify magic number
         assert data.startswith(b"P6\n")
 
-        # Verify it contains FT metadata
-        assert b"#FT:" in data
+        # Verify it contains footer metadata (format: \n<x> <y> <layer>\n)
+        assert b"\n0 0 0\n" in data
 
         # Verify dimensions
         assert b"2 2\n" in data
@@ -37,8 +37,8 @@ class TestPPMFormatter:
 
         data = PPMFormatter.encode(pixels, x_offset=10, y_offset=20, layer=5)
 
-        # Check FT metadata is correct
-        assert b"#FT: 10 20 5" in data
+        # Check metadata is correct (format: \n<x> <y> <layer>\n)
+        assert b"\n10 20 5\n" in data
 
     def test_decode_simple_frame(self):
         """Test decoding a PPM frame."""

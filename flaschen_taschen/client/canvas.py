@@ -191,22 +191,68 @@ class Canvas:
             rgb_row = [(r, g, b) for r, g, b, _ in row]
             rgb_pixels.append(rgb_row)
 
-        # Encode to PPM
-        ppm_data = PPMFormatter.encode(
-            rgb_pixels,
-            x_offset=self.config.x_offset,
-            y_offset=self.config.y_offset,
-            layer=self.config.layer,
-        )
-
-        # Send via connection
-        success = self.connection.send_frame(ppm_data, force=force)
+        # Send in multiple packets if needed (like C++ implementation)
+        # This ensures the header with layer metadata is properly sent for each tile
+        success = self._send_tiled(rgb_pixels, force=force)
 
         if success:
             self._frame_count += 1
             self.dirty = False
 
         return success
+
+    def _send_tiled(self, rgb_pixels: list, force: bool = False) -> bool:
+        """Send pixels in tiles, matching C++ implementation behavior.
+
+        The C++ UDP client splits large images into multiple packets,
+        with each packet containing its own PPM header (including layer metadata).
+        This ensures the display server correctly receives the layer information.
+
+        Args:
+            rgb_pixels: 2D list of (r, g, b) tuples
+            force: If True, send immediately without rate limiting
+
+        Returns:
+            True if all packets sent successfully
+        """
+        # Calculate how many rows fit in a single UDP packet
+        # Reserve 64 bytes for header (matching C++ kFlaschenTaschenHeaderReserve)
+        max_udp_size = 65507
+        header_reserve = 64
+        row_size = 3 * self.config.width
+        max_rows_per_packet = (max_udp_size - header_reserve) // row_size
+
+        if max_rows_per_packet <= 0:
+            max_rows_per_packet = 1
+
+        height = len(rgb_pixels)
+        tile_offset = 0
+        all_success = True
+
+        # Send each tile as a separate packet with its own header
+        while tile_offset < height:
+            send_height = min(max_rows_per_packet, height - tile_offset)
+
+            # Extract this tile's rows
+            tile_pixels = rgb_pixels[tile_offset:tile_offset + send_height]
+
+            # Encode tile with proper header containing layer metadata
+            # Note: y_offset is adjusted for each tile, but layer stays constant
+            ppm_data = PPMFormatter.encode(
+                tile_pixels,
+                x_offset=self.config.x_offset,
+                y_offset=self.config.y_offset + tile_offset,
+                layer=self.config.layer,
+            )
+
+            # Send this tile's packet
+            success = self.connection.send_frame(ppm_data, force=force)
+            if not success:
+                all_success = False
+
+            tile_offset += send_height
+
+        return all_success
 
     def draw(self):
         """Draw the current frame (placeholder for user implementation).
@@ -315,14 +361,42 @@ class LayeredCanvas:
         """
         rgb_pixels = [[(r, g, b) for r, g, b, _ in row] for row in pixels]
 
-        ppm_data = PPMFormatter.encode(
-            rgb_pixels,
-            x_offset=self.config.x_offset,
-            y_offset=self.config.y_offset,
-            layer=layer,
-        )
+        # Calculate how many rows fit in a single UDP packet (matching C++ behavior)
+        max_udp_size = 65507
+        header_reserve = 64
+        row_size = 3 * self.config.width
+        max_rows_per_packet = (max_udp_size - header_reserve) // row_size
 
-        return self.connection.send_frame(ppm_data)
+        if max_rows_per_packet <= 0:
+            max_rows_per_packet = 1
+
+        height = len(rgb_pixels)
+        tile_offset = 0
+        all_success = True
+
+        # Send each tile as a separate packet with its own header
+        while tile_offset < height:
+            send_height = min(max_rows_per_packet, height - tile_offset)
+
+            # Extract this tile's rows
+            tile_pixels = rgb_pixels[tile_offset:tile_offset + send_height]
+
+            # Encode tile with proper header containing layer metadata
+            ppm_data = PPMFormatter.encode(
+                tile_pixels,
+                x_offset=self.config.x_offset,
+                y_offset=self.config.y_offset + tile_offset,
+                layer=layer,
+            )
+
+            # Send this tile's packet
+            success = self.connection.send_frame(ppm_data)
+            if not success:
+                all_success = False
+
+            tile_offset += send_height
+
+        return all_success
 
     def close(self):
         """Close all layers."""

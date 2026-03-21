@@ -30,7 +30,7 @@ class PPMFormatter:
             layer: Layer number (0-15)
 
         Returns:
-            PPM binary data with FT metadata header
+            PPM binary data with FT metadata footer
         """
         if not pixels or not pixels[0]:
             raise ValueError("Pixel data cannot be empty")
@@ -43,16 +43,12 @@ class PPMFormatter:
             if len(row) != width:
                 raise ValueError("All pixel rows must have same width")
 
-        # Build PPM header with FT metadata (order matters!)
+        # Build PPM header (standard format without metadata)
         header = cls.PPM_MAGIC + b"\n"
 
-        # PPM image dimensions (must come before FT metadata)
+        # PPM image dimensions
         dimensions = f"{width} {height}\n"
         header += dimensions.encode("ascii")
-
-        # FT metadata comment: #FT: <x> <y> <layer>
-        ft_metadata = f"#FT: {x_offset} {y_offset} {layer}\n"
-        header += ft_metadata.encode("ascii")
 
         # Max color value
         max_color = f"{cls.MAX_COLOR_VALUE}\n"
@@ -69,11 +65,15 @@ class PPMFormatter:
                 b = max(0, min(255, int(b)))
                 pixel_data += struct.pack("BBB", r, g, b)
 
-        return header + pixel_data
+        # FT metadata footer: \n<x> <y> <layer>\n (matches Swift/C++ format)
+        ft_metadata = f"\n{x_offset} {y_offset} {layer}\n"
+        footer = ft_metadata.encode("ascii")
+
+        return header + pixel_data + footer
 
     @classmethod
     def decode(cls, data: bytes) -> dict:
-        """Decode PPM binary format with FT metadata.
+        """Decode PPM binary format with FT metadata footer.
 
         Args:
             data: PPM binary data
@@ -83,24 +83,21 @@ class PPMFormatter:
             - 'pixels': 2D list of (r, g, b) tuples
             - 'width': Image width
             - 'height': Image height
-            - 'x_offset': X offset (from FT metadata)
-            - 'y_offset': Y offset (from FT metadata)
-            - 'layer': Layer number (from FT metadata)
+            - 'x_offset': X offset (from FT metadata footer)
+            - 'y_offset': Y offset (from FT metadata footer)
+            - 'layer': Layer number (from FT metadata footer)
         """
         # Read magic number
         if not data.startswith(b"P6"):
             raise ValueError("Invalid PPM format: must be P6")
 
-        # Split header from pixel data at first binary marker
-        # We need to read: magic, then skip comments/whitespace, read width/height/maxval
-        lines_data = b""
+        # Parse header line by line
         pos = 2  # Skip "P6"
-
-        ft_data = {"x_offset": 0, "y_offset": 0, "layer": 0}
         header_complete = False
         header_lines_count = 0
+        width = 0
+        height = 0
 
-        # Parse header line by line
         while pos < len(data) and not header_complete:
             # Skip whitespace
             while pos < len(data) and data[pos : pos + 1] in (b" ", b"\t", b"\n", b"\r"):
@@ -118,18 +115,8 @@ class PPMFormatter:
             if pos < len(data) and data[pos : pos + 1] in (b"\n", b"\r"):
                 pos += 1
 
-            # Handle comments
+            # Skip comments in header
             if line.startswith(b"#"):
-                if line.startswith(b"#FT:"):
-                    try:
-                        parts = line[4:].decode("ascii").split()
-                        ft_data = {
-                            "x_offset": int(parts[0]) if len(parts) > 0 else 0,
-                            "y_offset": int(parts[1]) if len(parts) > 1 else 0,
-                            "layer": int(parts[2]) if len(parts) > 2 else 0,
-                        }
-                    except (IndexError, ValueError):
-                        pass
                 continue
 
             # Count non-comment header lines
@@ -168,6 +155,27 @@ class PPMFormatter:
                 r, g, b = struct.unpack("BBB", pixel_data[pixel_idx : pixel_idx + 3])
                 row.append((r, g, b))
             pixels.append(row)
+
+        # Parse metadata footer: \n<x> <y> <layer>\n (matches Swift/C++ format)
+        ft_data = {"x_offset": 0, "y_offset": 0, "layer": 0}
+        footer_start = pos + expected_pixel_bytes
+        if footer_start < len(data):
+            footer = data[footer_start:].decode("ascii", errors="ignore")
+            # Look for lines with three space-separated integers (not starting with #)
+            for line in footer.split("\n"):
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    try:
+                        parts = line.split()
+                        if len(parts) >= 3:
+                            ft_data = {
+                                "x_offset": int(parts[0]),
+                                "y_offset": int(parts[1]),
+                                "layer": int(parts[2]),
+                            }
+                            break
+                    except ValueError:
+                        continue
 
         result = {
             "pixels": pixels,

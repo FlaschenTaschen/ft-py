@@ -5,6 +5,7 @@ import time
 from typing import Optional
 
 from flaschen_taschen.client.config import Config
+from flaschen_taschen.client.ppm_formatter import PPMFormatter
 
 
 class UDPClient:
