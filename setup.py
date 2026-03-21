@@ -13,6 +13,13 @@ setup(
     packages=find_packages(),
     python_requires=">=3.8",
     install_requires=[],
+    entry_points={
+        "console_scripts": [
+            "send-text=flaschen_taschen.cli.send_text:main",
+            "send-image=flaschen_taschen.cli.send_image:main",
+            "send-video=flaschen_taschen.cli.send_video:main",
+        ],
+    },
     extras_require={
         "dev": [
             "pytest>=6.0",
