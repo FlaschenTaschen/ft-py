@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flaschen-taschen-py"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python port of FlaschenTaschen display control library"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -40,13 +40,26 @@ video = ["ffmpeg-python>=0.2.1"]
 numpy = ["numpy>=1.20"]
 midi = ["mido>=1.2.9"]
 
+[project.scripts]
+send-text = "flaschen_taschen.cli.send_text:main"
+send-image = "flaschen_taschen.cli.send_image:main"
+send-video = "flaschen_taschen.cli.send_video:main"
+ft-debugger = "flaschen_taschen.cli.ft_debugger:main"
+
 [project.urls]
 Homepage = "https://github.com/FlaschenTaschen/ft-py"
-Documentation = "https://github.com/FlaschenTaschen/ft-py/wiki"
+Documentation = "https://github.com/FlaschenTaschen/ft-py/tree/main/docs"
 Repository = "https://github.com/FlaschenTaschen/ft-py"
 
 [tool.setuptools]
-packages = ["flaschen_taschen", "flaschen_taschen.client"]
+packages = [
+    "flaschen_taschen",
+    "flaschen_taschen.client",
+    "flaschen_taschen.demos",
+    "flaschen_taschen.generators",
+    "flaschen_taschen.utils",
+    "flaschen_taschen.cli",
+]
 
 [tool.setuptools.package-data]
 flaschen_taschen = ["py.typed"]

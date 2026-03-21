@@ -1,9 +1,9 @@
 # FlaschenTaschen Python Port - Progress Tracking
 
 ## Current Status
-Phase 6 COMPLETE - Packaging & Distribution (2026-03-20)
-**Phase 5 VERIFIED COMPLETE** - 2026-03-20
-**Phase 6 Deliverables:** README.md, GitHub URLs updated, wheel + source distribution built, PyPI package published (v0.1.0)
+Phase 7 COMPLETE - Documentation & Testing (2026-03-21)
+**Phase 6 COMPLETE** - 2026-03-20 (Packaging & Distribution, v0.1.0 published)
+**Phase 7 Deliverables:** 9 comprehensive Markdown docs + 2 critical bug fixes + v0.1.1 published
 
 **Verification Complete**:
 - [COMPLETE] blur.py - 2x2 simple blur with decay + 9 color palettes (C++ base + Swift enhancements)
@@ -431,6 +431,52 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 
 ## Completed Phases
 
+### Phase 7: Documentation & Testing [COMPLETE - 2026-03-21]
+**Deliverable**: Comprehensive user documentation + bug fixes + v0.1.1 patch release
+
+**What was implemented:**
+
+1. **Documentation Structure** (`docs/` folder)
+   - `index.md` — Overview, navigation, quick start
+   - `getting-started.md` — Installation, connection, first script, running demos
+   - `api/client.md` — Canvas, Color, Config, ColorPalette API reference (1,000+ lines)
+   - `api/demos.md` — Demo framework + all 16 demos with usage examples
+   - `api/generators.md` — Text, Image, Video generators API reference
+   - `api/cli.md` — CLI tools (send-text, send-image, send-video, ft-debugger) with flag tables
+   - `guides/custom-demos.md` — Step-by-step guide + bouncing ball example + patterns
+   - `guides/performance.md` — Frame rate tuning, algorithm optimization, profiling tips
+   - `examples/cookbook.md` — 30+ copy-paste recipes for common tasks
+
+2. **Critical Bug Fixes**
+   - **Fixed: Missing subpackages in wheel** — pyproject.toml was only listing client module, missing demos/, generators/, utils/, cli/ subpackages. This meant demos and CLI tools were NOT included in v0.1.0 wheel.
+   - **Fixed: Missing entry points in pyproject.toml** — CLI entry points (send-text, send-image, send-video, ft-debugger) were only in setup.py. Added to pyproject.toml [project.scripts] section.
+
+3. **Version Release**
+   - Bumped version to 0.1.1 (patch release for bug fixes)
+   - Updated pyproject.toml with all 6 subpackages
+   - Added CLI entry points to pyproject.toml
+   - Updated GitHub docs URL to point to docs/ folder
+   - Published v0.1.1 to PyPI with all fixes
+
+**Documentation Highlights:**
+- Getting Started: 3 installation options, connection setup, first script, running demos
+- Client API: Complete Canvas/Color/Config reference with 50+ examples
+- Demos API: Table of all 16 demos with descriptions and usage
+- Custom Demos: Full-page guide with physics simulation example, performance tips
+- Cookbook: 30+ recipes (text, images, shapes, color cycling, animations, layers, error handling)
+
+**Bug Fix Verification:**
+```
+✓ All 6 subpackages now included in wheel
+✓ 4 CLI entry points in entry_points.txt
+✓ All demos and generators importable after install
+✓ send-text, send-image, send-video, ft-debugger CLI commands available
+```
+
+**Package Size:**
+- v0.1.0: 27.7 KB wheel (incomplete)
+- v0.1.1: 83.2 KB wheel (complete with all subpackages)
+
 ### Phase 6: Packaging & Distribution [COMPLETE - 2026-03-20]
 **Deliverable**: Published Python package on PyPI with proper documentation
 
@@ -463,8 +509,16 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 ✓ Package installs and imports correctly
 ```
 
-## Planned Phases (Not Started)
-- [ ] Phase 7: Documentation & Testing (API docs, advanced guides, performance optimization)
+## Project Summary
+
+**Completion:** All 7 phases complete. Full-featured Python port of FlaschenTaschen with:
+- ✓ Core client library (Canvas, Color, Config, PPM/UDP communication)
+- ✓ 16 interactive demos (Life, Maze, Sierpinski, Plasma, Matrix, Fractal, etc.)
+- ✓ Content generators (Text, Image, Video with CLI tools)
+- ✓ CLI tools (send-text, send-image, send-video, ft-debugger)
+- ✓ Complete test suite (150+ tests passing)
+- ✓ Published on PyPI (v0.1.1)
+- ✓ Comprehensive documentation (9 docs, 50+ examples, API reference)
 
 ## Key Files Created
 
@@ -533,7 +587,7 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 When context is cleared, read this file to determine where to resume work. Look for the current phase and incomplete items to continue from that point.
 
 ## Blockers / Issues
-None currently. Phase 6 complete - package published on PyPI.
+None currently. Phase 7 complete - comprehensive documentation and bug fixes published.
 
 ## Notes
 - Swift code is primary reference; C++ as fallback
