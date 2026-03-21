@@ -3,7 +3,7 @@
 ## Current Status
 Phase 5 IN PROGRESS - Interactive Demos Batch 2
 **Phase 4 VERIFIED COMPLETE** - 2026-03-20
-**Phase 5 Progress** - 6 of 8+ demos completed: life.py, maze.py, sierpinski.py, lines.py, fractal.py, random_dots.py (2026-03-20)
+**Phase 5 Progress** - 9 of 9 core demos completed: life.py, maze.py, sierpinski.py, lines.py, fractal.py, random_dots.py, hack.py, nblogo.py, sflogo.py (2026-03-20)
 
 **Verification Complete**:
 - [COMPLETE] blur.py - 2x2 simple blur with decay + 9 color palettes (C++ base + Swift enhancements)
@@ -399,6 +399,36 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
   - scripts/run_random_dots.sh script for quick testing
   - All tests passing ✓
 
+- [COMPLETE] hack.py - Rotating 3D text display with blur effect (2026-03-20)
+  - Vector font with 36 characters (0-9, A-Z)
+  - 3D rotation around Y axis with perspective projection
+  - Each character displays for 45 frames, rotating 8 degrees per frame
+  - Blur and border effects with pixel buffer manipulation
+  - 3 color palettes (Nebula, Fire, Bluegreen) cycling every 200 frames
+  - Command-line text selection (`default: "HACK"`) and palette selection (`-p` flag)
+  - 10 comprehensive tests covering initialization, animation, palette cycling
+  - scripts/run_hack.sh script for quick testing
+  - All tests passing ✓
+
+- [COMPLETE] nblogo.py - Noisebridge logo animation (2026-03-20)
+  - 16x15 pixel bitmap logo bouncing around the screen
+  - 256-color rainbow palette with continuous color cycling
+  - Position updates every 8 frames with bouncing at screen edges
+  - Optional fixed color mode (`-c` flag)
+  - 8 comprehensive tests covering initialization, bouncing, color cycling
+  - scripts/run_nblogo.sh script for quick testing
+  - All tests passing ✓
+
+- [COMPLETE] sflogo.py - Sequoia Fabrica tree logo animation (2026-03-20)
+  - Line-based tree logo (SVG coordinates) with Bresenham's line drawing
+  - Bouncing animation similar to nblogo (position updates every 8 frames)
+  - 256-color rainbow palette with continuous color cycling
+  - Optional fixed color mode (`-c` flag)
+  - Draws canopy outline, trunk lines, center line, roots, branches, and nodes
+  - 8 comprehensive tests covering initialization, bouncing, color cycling
+  - scripts/run_sflogo.sh script for quick testing
+  - All tests passing ✓
+
 ## Planned Phases (Not Started)
 - [ ] Phase 5: Interactive Demos - Batch 2 (advanced algorithms, interactive)
 - [ ] Phase 6: Packaging & Distribution
@@ -413,13 +443,19 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 - flaschen_taschen/demos/lines.py (Lines demo + Bresenham algorithm + color state management)
 - flaschen_taschen/demos/fractal.py (Fractal demo + Mandelbrot computation + zoom animation)
 - flaschen_taschen/demos/random_dots.py (RandomDots demo + simple particle effect)
-- tests/test_demos/test_demos.py - Added TestLife (5 tests), TestMaze (11 tests), TestSierpinski (11 tests), TestLines (13 tests), TestFractal (12 tests), TestRandomDots (8 tests)
+- flaschen_taschen/demos/hack.py (Hack demo + vector font + 3D text rotation + blur/border effects)
+- flaschen_taschen/demos/nblogo.py (NbLogo demo + bouncing logo animation)
+- flaschen_taschen/demos/sflogo.py (SfLogo demo + tree logo with line drawing)
+- tests/test_demos/test_demos.py - Added TestLife (5 tests), TestMaze (11 tests), TestSierpinski (11 tests), TestLines (13 tests), TestFractal (12 tests), TestRandomDots (8 tests), TestHack (10 tests), TestNbLogo (8 tests), TestSfLogo (8 tests)
 - scripts/run_life.sh (Shell script for life.py)
 - scripts/run_maze.sh (Shell script for maze.py)
 - scripts/run_sierpinski.sh (Shell script for sierpinski.py)
 - scripts/run_lines.sh (Shell script for lines.py)
 - scripts/run_fractal.sh (Shell script for fractal.py)
 - scripts/run_random_dots.sh (Shell script for random_dots.py)
+- scripts/run_hack.sh (Shell script for hack.py)
+- scripts/run_nblogo.sh (Shell script for nblogo.py)
+- scripts/run_sflogo.sh (Shell script for sflogo.py)
 
 ### Phase 3
 - flaschen_taschen/debugger.py (DisplayDebugger: edges/fill modes, palette cycling)
@@ -465,7 +501,7 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 When context is cleared, read this file to determine where to resume work. Look for the current phase and incomplete items to continue from that point.
 
 ## Blockers / Issues
-None currently. Phase 5 in progress - 3 of 8+ demos completed (life, maze, sierpinski).
+None currently. Phase 5 complete - all 9 core interactive demos completed.
 
 ## Notes
 - Swift code is primary reference; C++ as fallback

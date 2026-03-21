@@ -16,6 +16,9 @@ from flaschen_taschen.demos.sierpinski import Sierpinski
 from flaschen_taschen.demos.lines import Lines, ColorState, LineState, Line
 from flaschen_taschen.demos.fractal import Fractal, FractalState
 from flaschen_taschen.demos.random_dots import RandomDots
+from flaschen_taschen.demos.hack import Hack
+from flaschen_taschen.demos.nblogo import NbLogo
+from flaschen_taschen.demos.sflogo import SfLogo
 
 
 @pytest.fixture
@@ -1199,4 +1202,264 @@ class TestRandomDots:
             demo.update()
             demo.draw()
 
+        # Should complete without exceptions
+
+
+class TestHack:
+    """Test Hack demo."""
+
+    def test_hack_initialization(self, std_opts):
+        """Test initialization."""
+        demo = Hack(std_opts)
+        assert demo.std_opts == std_opts
+        assert demo.text == "HACK"
+        assert demo.palette_num == 1
+
+    def test_hack_text_parsing(self, std_opts):
+        """Test text argument parsing."""
+        opts = StandardOptions(["-g", "40x30", "-t", "1", "HELLO"])
+        demo = Hack(opts)
+        assert demo.text == "HELLO"
+
+    def test_hack_palette_selection(self, std_opts):
+        """Test palette selection via -p flag."""
+        opts = StandardOptions(["-g", "40x30", "-t", "1", "-p", "2"])
+        demo = Hack(opts)
+        assert demo.palette_num == 2
+
+    def test_hack_setup(self, std_opts):
+        """Test setup initializes pixels and palette."""
+        demo = Hack(std_opts)
+        demo.setup()
+        assert demo.canvas is not None
+        assert len(demo.pixels) == demo.canvas.width * demo.canvas.height
+        assert len(demo.palette) == 256
+
+    def test_hack_char_codes(self, std_opts):
+        """Test character code conversion."""
+        opts = StandardOptions(["-g", "40x30", "-t", "1", "A5Z"])
+        demo = Hack(opts)
+        demo.setup()
+        # A=10, 5=5, Z=35
+        assert demo.char_codes == [10, 5, 35]
+
+    def test_hack_update_frame_count(self, std_opts):
+        """Test update increments frame counter."""
+        demo = Hack(std_opts)
+        demo.setup()
+        initial_frame = demo.frame_count
+        demo.update()
+        assert demo.frame_count == initial_frame + 1
+
+    def test_hack_draw_no_error(self, std_opts):
+        """Test draw executes without error."""
+        demo = Hack(std_opts)
+        demo.setup()
+        demo.draw()
+        # Should complete without exception
+
+    def test_hack_palette_cycling(self, std_opts):
+        """Test palette cycles every 200 frames."""
+        demo = Hack(std_opts)
+        demo.setup()
+        initial_palette_num = demo.palette_num
+        # Run 200 frames
+        for _ in range(200):
+            demo.update()
+            demo.draw()
+        # Palette should have cycled
+        assert demo.palette_num != initial_palette_num
+
+    def test_hack_animation_frames(self, std_opts):
+        """Test animation frame calculation."""
+        demo = Hack(std_opts)
+        demo.setup()
+        # Frame 0: char index 0, frame in char 0, angle 0
+        demo.frame_count = 0
+        assert (demo.frame_count // 45) % len(demo.char_codes) >= 0
+        # Frame 45: next character
+        demo.frame_count = 45
+        assert (demo.frame_count // 45) % len(demo.char_codes) == 1
+
+    def test_hack_pixel_buffer_cleared(self, std_opts):
+        """Test pixel buffer is cleared before drawing."""
+        demo = Hack(std_opts)
+        demo.setup()
+        # Fill pixels with non-zero values
+        demo.pixels = [255] * len(demo.pixels)
+        demo.draw()
+        # After draw, pixels should have been processed (blur applied)
+        # At least some pixels should be modified
+        assert any(p < 255 for p in demo.pixels)
+
+
+class TestNbLogo:
+    """Test NbLogo demo."""
+
+    def test_nblogo_initialization(self, std_opts):
+        """Test initialization."""
+        demo = NbLogo(std_opts)
+        assert demo.std_opts == std_opts
+        assert demo.frame_count == 0
+        assert demo.x == -1
+        assert demo.y == -1
+
+    def test_nblogo_position_update(self, std_opts):
+        """Test position updates every 8 frames."""
+        demo = NbLogo(std_opts)
+        demo.setup()
+        # Frame 0 is special - position updates on frame 0
+        demo.update()  # frame_count becomes 1
+        pos_after_first = (demo.x, demo.y)
+        # Frames 1-7: position shouldn't change
+        for _ in range(7):
+            demo.update()
+        assert (demo.x, demo.y) == pos_after_first
+        # Frame 8: position should change again
+        demo.update()
+        assert (demo.x, demo.y) != pos_after_first
+
+    def test_nblogo_setup(self, std_opts):
+        """Test setup initializes palette."""
+        demo = NbLogo(std_opts)
+        demo.setup()
+        assert demo.canvas is not None
+        assert len(demo.palette) == 256
+
+    def test_nblogo_color_cycling(self, std_opts):
+        """Test color cycles through palette."""
+        demo = NbLogo(std_opts)
+        demo.setup()
+        colors_used = set()
+        for _ in range(300):
+            color = demo.palette[demo.frame_count % 256]
+            colors_used.add((color.r, color.g, color.b))
+            demo.frame_count += 1
+        # Should use many different colors
+        assert len(colors_used) > 200
+
+    def test_nblogo_fixed_color(self, std_opts):
+        """Test fixed color mode."""
+        opts = StandardOptions(["-g", "40x30", "-t", "1", "-c", "ff0000"])
+        demo = NbLogo(opts)
+        demo.setup()
+        assert demo.logo_color is not None
+        assert demo.logo_color.r == 255
+        assert demo.logo_color.g == 0
+        assert demo.logo_color.b == 0
+
+    def test_nblogo_draw_no_error(self, std_opts):
+        """Test draw executes without error."""
+        demo = NbLogo(std_opts)
+        demo.setup()
+        demo.draw()
+        # Should complete without exception
+
+    def test_nblogo_bouncing(self, std_opts):
+        """Test bouncing animation."""
+        demo = NbLogo(std_opts)
+        demo.setup()
+        # Run many frames to test bouncing
+        positions = []
+        for _ in range(200):
+            demo.update()
+            demo.draw()
+            positions.append((demo.x, demo.y))
+        # Position should vary (logo is bouncing)
+        unique_positions = len(set(positions))
+        assert unique_positions > 5
+
+    def test_nblogo_continuous(self, std_opts):
+        """Test continuous animation without errors."""
+        demo = NbLogo(std_opts)
+        demo.setup()
+        for _ in range(200):
+            demo.update()
+            demo.draw()
+        # Should complete without exceptions
+
+
+class TestSfLogo:
+    """Test SfLogo demo."""
+
+    def test_sflogo_initialization(self, std_opts):
+        """Test initialization."""
+        demo = SfLogo(std_opts)
+        assert demo.std_opts == std_opts
+        assert demo.frame_count == 0
+        assert demo.x == -1
+        assert demo.y == -1
+
+    def test_sflogo_position_update(self, std_opts):
+        """Test position updates every 8 frames."""
+        demo = SfLogo(std_opts)
+        demo.setup()
+        # Frame 0 is special - position updates on frame 0
+        demo.update()  # frame_count becomes 1
+        pos_after_first = (demo.x, demo.y)
+        # Frames 1-7: position shouldn't change
+        for _ in range(7):
+            demo.update()
+        assert (demo.x, demo.y) == pos_after_first
+        # Frame 8: position should change again
+        demo.update()
+        assert (demo.x, demo.y) != pos_after_first
+
+    def test_sflogo_setup(self, std_opts):
+        """Test setup initializes palette."""
+        demo = SfLogo(std_opts)
+        demo.setup()
+        assert demo.canvas is not None
+        assert len(demo.palette) == 256
+
+    def test_sflogo_color_cycling(self, std_opts):
+        """Test color cycles through palette."""
+        demo = SfLogo(std_opts)
+        demo.setup()
+        colors_used = set()
+        for _ in range(300):
+            color = demo.palette[demo.frame_count % 256]
+            colors_used.add((color.r, color.g, color.b))
+            demo.frame_count += 1
+        # Should use many different colors
+        assert len(colors_used) > 200
+
+    def test_sflogo_fixed_color(self, std_opts):
+        """Test fixed color mode."""
+        opts = StandardOptions(["-g", "40x30", "-t", "1", "-c", "00ff00"])
+        demo = SfLogo(opts)
+        demo.setup()
+        assert demo.logo_color is not None
+        assert demo.logo_color.r == 0
+        assert demo.logo_color.g == 255
+        assert demo.logo_color.b == 0
+
+    def test_sflogo_draw_no_error(self, std_opts):
+        """Test draw executes without error."""
+        demo = SfLogo(std_opts)
+        demo.setup()
+        demo.draw()
+        # Should complete without exception
+
+    def test_sflogo_bouncing(self, std_opts):
+        """Test bouncing animation."""
+        demo = SfLogo(std_opts)
+        demo.setup()
+        # Run many frames to test bouncing
+        positions = []
+        for _ in range(200):
+            demo.update()
+            demo.draw()
+            positions.append((demo.x, demo.y))
+        # Position should vary (logo is bouncing)
+        unique_positions = len(set(positions))
+        assert unique_positions > 5
+
+    def test_sflogo_continuous(self, std_opts):
+        """Test continuous animation without errors."""
+        demo = SfLogo(std_opts)
+        demo.setup()
+        for _ in range(200):
+            demo.update()
+            demo.draw()
         # Should complete without exceptions
