@@ -8,7 +8,7 @@ optional performance optimization.
 import math
 import random
 
-from flaschen_taschen.client.color import create_hsv_palette
+from flaschen_taschen.client.color import Color, create_hsv_palette
 from flaschen_taschen.demos import Demo, run_demo
 
 try:
@@ -25,6 +25,26 @@ class PlasmaDemo(Demo):
         """Initialize plasma lookup tables and parameters."""
         super().setup()
         assert self.canvas is not None
+
+        # Parse palette selection from -p flag
+        self.palette_num = -1  # -1 = default (HSV)
+        if self.std_opts.non_standard_args:
+            for arg in self.std_opts.non_standard_args:
+                arg_lower = arg.lower()
+                if arg_lower.startswith("-p"):
+                    try:
+                        if arg_lower == "-p" and len(self.std_opts.non_standard_args) > 1:
+                            # -p is separate, next arg should be palette num
+                            idx = self.std_opts.non_standard_args.index(arg)
+                            if idx + 1 < len(self.std_opts.non_standard_args):
+                                self.palette_num = int(self.std_opts.non_standard_args[idx + 1])
+                        else:
+                            # Try to parse -p1, -p2, etc.
+                            num_str = arg_lower[2:] if len(arg_lower) > 2 else ""
+                            if num_str:
+                                self.palette_num = int(num_str)
+                    except (ValueError, IndexError):
+                        pass
 
         # Parameters matching Swift version
         self.lookup_quant = 20
@@ -45,9 +65,8 @@ class PlasmaDemo(Demo):
         self.hw = self.lookup_quant * self.canvas.width // 2
         self.hh = self.lookup_quant * self.canvas.height // 2
 
-        # Color palette
-        palette_obj = create_hsv_palette(256)
-        self.palette = palette_obj.colors
+        # Color palette (use selected palette)
+        self.palette = self._create_palette(self.palette_num)
 
         # Animation counter
         self.count = random.uniform(0, 100000)
@@ -89,6 +108,107 @@ class PlasmaDemo(Demo):
         if value > max_val:
             return max_val
         return value
+
+    @staticmethod
+    def _color_gradient(start: int, end: int, r1: int, g1: int, b1: int, r2: int, g2: int, b2: int) -> list:
+        """Generate color gradient from (r1,g1,b1) to (r2,g2,b2)."""
+        gradient = []
+        num_colors = end - start + 1
+        for i in range(num_colors):
+            k = i / (num_colors - 1) if num_colors > 1 else 0
+            r = int(r1 + (r2 - r1) * k)
+            g = int(g1 + (g2 - g1) * k)
+            b = int(b1 + (b2 - b1) * k)
+            gradient.append(Color(r, g, b))
+        return gradient
+
+    @staticmethod
+    def _create_palette(palette_num: int) -> list:
+        """Create color palette for plasma effect.
+
+        Args:
+            palette_num: -1=HSV (default), 0=Rainbow, 1=Nebula, 2=Fire, 3=Bluegreen,
+                        4=Colorful, 5=Magma, 6=Inferno, 7=Plasma, 8=Viridis
+
+        Returns:
+            List of 256 Color objects
+        """
+        if palette_num < 0:
+            # Default: HSV palette
+            palette_obj = create_hsv_palette(256)
+            return palette_obj.colors
+
+        palette = [Color.BLACK] * 256
+
+        if palette_num == 0:
+            # Rainbow: red -> yellow -> green -> cyan -> blue -> magenta
+            palette[0:43] = PlasmaDemo._color_gradient(0, 42, 255, 0, 0, 255, 255, 0)
+            palette[43:86] = PlasmaDemo._color_gradient(43, 85, 255, 255, 0, 0, 255, 0)
+            palette[86:129] = PlasmaDemo._color_gradient(86, 128, 0, 255, 0, 0, 255, 255)
+            palette[129:171] = PlasmaDemo._color_gradient(129, 170, 0, 255, 255, 0, 0, 255)
+            palette[171:214] = PlasmaDemo._color_gradient(171, 213, 0, 0, 255, 255, 0, 255)
+            palette[214:256] = PlasmaDemo._color_gradient(214, 255, 255, 0, 255, 255, 0, 0)
+
+        elif palette_num == 1:
+            # Nebula: black -> half blue -> blue-violet -> red -> white
+            palette[0:32] = PlasmaDemo._color_gradient(0, 31, 1, 1, 1, 0, 0, 127)
+            palette[32:96] = PlasmaDemo._color_gradient(32, 95, 0, 0, 127, 127, 0, 255)
+            palette[96:160] = PlasmaDemo._color_gradient(96, 159, 127, 0, 255, 255, 0, 0)
+            palette[160:192] = PlasmaDemo._color_gradient(160, 191, 255, 0, 0, 255, 255, 255)
+            palette[192:256] = [Color.WHITE] * 64
+
+        elif palette_num == 2:
+            # Fire: black -> half blue -> red -> yellow -> white
+            palette[0:32] = PlasmaDemo._color_gradient(0, 31, 1, 1, 1, 0, 0, 127)
+            palette[32:96] = PlasmaDemo._color_gradient(32, 95, 0, 0, 127, 255, 0, 0)
+            palette[96:160] = PlasmaDemo._color_gradient(96, 159, 255, 0, 0, 255, 255, 0)
+            palette[160:192] = PlasmaDemo._color_gradient(160, 191, 255, 255, 0, 255, 255, 255)
+            palette[192:256] = [Color.WHITE] * 64
+
+        elif palette_num == 3:
+            # Bluegreen: black -> half blue -> teal -> green -> white
+            palette[0:32] = PlasmaDemo._color_gradient(0, 31, 1, 1, 1, 0, 0, 127)
+            palette[32:96] = PlasmaDemo._color_gradient(32, 95, 0, 0, 127, 0, 127, 255)
+            palette[96:160] = PlasmaDemo._color_gradient(96, 159, 0, 127, 255, 0, 255, 0)
+            palette[160:192] = PlasmaDemo._color_gradient(160, 191, 0, 255, 0, 255, 255, 255)
+            palette[192:256] = [Color.WHITE] * 64
+
+        elif palette_num == 4:
+            # Colorful: red-dominant -> magenta -> cyan -> white
+            palette[0:64] = PlasmaDemo._color_gradient(0, 63, 0, 0, 0, 255, 0, 0)
+            palette[64:128] = PlasmaDemo._color_gradient(64, 127, 255, 0, 0, 255, 0, 255)
+            palette[128:192] = PlasmaDemo._color_gradient(128, 191, 255, 0, 255, 0, 255, 255)
+            palette[192:256] = PlasmaDemo._color_gradient(192, 255, 0, 255, 255, 255, 255, 255)
+
+        elif palette_num == 5:
+            # Magma: black -> purple -> red -> yellow -> white
+            palette[0:64] = PlasmaDemo._color_gradient(0, 63, 13, 11, 30, 75, 0, 130)
+            palette[64:128] = PlasmaDemo._color_gradient(64, 127, 75, 0, 130, 255, 0, 0)
+            palette[128:192] = PlasmaDemo._color_gradient(128, 191, 255, 0, 0, 255, 255, 0)
+            palette[192:256] = PlasmaDemo._color_gradient(192, 255, 255, 255, 0, 255, 255, 255)
+
+        elif palette_num == 6:
+            # Inferno: black -> purple -> orange -> yellow -> white
+            palette[0:64] = PlasmaDemo._color_gradient(0, 63, 0, 0, 4, 87, 16, 121)
+            palette[64:128] = PlasmaDemo._color_gradient(64, 127, 87, 16, 121, 224, 92, 14)
+            palette[128:192] = PlasmaDemo._color_gradient(128, 191, 224, 92, 14, 253, 231, 37)
+            palette[192:256] = PlasmaDemo._color_gradient(192, 255, 253, 231, 37, 255, 255, 255)
+
+        elif palette_num == 7:
+            # Plasma: dark purple -> magenta -> cyan -> yellow -> white
+            palette[0:64] = PlasmaDemo._color_gradient(0, 63, 13, 0, 51, 136, 0, 136)
+            palette[64:128] = PlasmaDemo._color_gradient(64, 127, 136, 0, 136, 0, 255, 255)
+            palette[128:192] = PlasmaDemo._color_gradient(128, 191, 0, 255, 255, 255, 255, 0)
+            palette[192:256] = PlasmaDemo._color_gradient(192, 255, 255, 255, 0, 255, 255, 255)
+
+        elif palette_num == 8:
+            # Viridis: dark blue -> cyan -> green -> yellow
+            palette[0:64] = PlasmaDemo._color_gradient(0, 63, 68, 1, 84, 59, 82, 139)
+            palette[64:128] = PlasmaDemo._color_gradient(64, 127, 59, 82, 139, 33, 145, 140)
+            palette[128:192] = PlasmaDemo._color_gradient(128, 191, 33, 145, 140, 253, 231, 37)
+            palette[192:256] = PlasmaDemo._color_gradient(192, 255, 253, 231, 37, 255, 255, 255)
+
+        return palette
 
     def update(self) -> None:
         """Update animation counter."""

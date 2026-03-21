@@ -6,7 +6,7 @@ Phase 4 IN PROGRESS - Interactive Demos Batch 1
 
 **Verification Progress** (awaiting manual user testing):
 - [COMPLETE] blur.py - 2x2 simple blur with decay + 9 color palettes (C++ base + Swift enhancements)
-- [REFACTORED] plasma.py - Pre-computed lookup tables + 3 sliding windows (from simple sine)
+- [COMPLETE] plasma.py - Pre-computed lookup tables + 3 sliding windows (from simple sine)
 - [REFACTORED] matrix.py - Simple green trails with white heads (from digit patterns)
 - [REFACTORED] quilt.py - Mirrored 8-pixel patterns with random colors (from seeded blocks)
 - [COMPLETE] firefly.py - Needs refactoring (Swift has 8 patterns, Python is basic)
