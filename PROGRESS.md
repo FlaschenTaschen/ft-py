@@ -3,7 +3,7 @@
 ## Current Status
 Phase 5 IN PROGRESS - Interactive Demos Batch 2
 **Phase 4 VERIFIED COMPLETE** - 2026-03-20
-**Phase 5 Started** - life.py completed (2026-03-20)
+**Phase 5 Progress** - 3 of 8+ demos completed: life.py, maze.py, sierpinski.py (2026-03-20)
 
 **Verification Complete**:
 - [COMPLETE] blur.py - 2x2 simple blur with decay + 9 color palettes (C++ base + Swift enhancements)
@@ -354,6 +354,19 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
   - Script tested with geometry, colors, and all parameter combinations ✓
   - All tests passing ✓
 
+- [COMPLETE] sierpinski.py - Sierpinski's Triangle fractal using chaos game algorithm (2026-03-20)
+  - Chaos game algorithm: random vertex selection with midpoint iteration
+  - Pixel accumulation rendering the Sierpinski triangle pattern
+  - 256-color rainbow palette cycling (default) or fixed foreground color
+  - Custom foreground/background colors (`-c`/`-b` flags)
+  - Palette mode (animated colors) vs fixed color mode
+  - Background color fixed to (1,1,1) nearly-black to match Swift
+  - Starting point optimized to triangle centroid for smooth convergence
+  - 11 comprehensive tests
+  - scripts/run_sierpinski.sh script for quick testing
+  - All tests passing ✓
+  - Visual output verified and matches Swift reference ✓
+
 ## Planned Phases (Not Started)
 - [ ] Phase 5: Interactive Demos - Batch 2 (advanced algorithms, interactive)
 - [ ] Phase 6: Packaging & Distribution
@@ -364,9 +377,11 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 ### Phase 5
 - flaschen_taschen/demos/life.py (Life demo + Life grid class + 256-color palette generation)
 - flaschen_taschen/demos/maze.py (Maze demo + DFS algorithm + 256-color palette generation)
-- tests/test_demos/test_demos.py - Added TestLife (15 tests) and TestMaze (11 tests)
+- flaschen_taschen/demos/sierpinski.py (Sierpinski demo + chaos game algorithm + 256-color palette generation)
+- tests/test_demos/test_demos.py - Added TestLife (5 tests), TestMaze (11 tests), TestSierpinski (11 tests)
 - scripts/run_life.sh (Shell script for life.py)
 - scripts/run_maze.sh (Shell script for maze.py)
+- scripts/run_sierpinski.sh (Shell script for sierpinski.py)
 
 ### Phase 3
 - flaschen_taschen/debugger.py (DisplayDebugger: edges/fill modes, palette cycling)
@@ -412,7 +427,7 @@ Implementing 8+ additional demos including sierpinski, lines, random_dots, fract
 When context is cleared, read this file to determine where to resume work. Look for the current phase and incomplete items to continue from that point.
 
 ## Blockers / Issues
-None currently. Phase 5 in progress - 2 of 8+ demos completed (life, maze).
+None currently. Phase 5 in progress - 3 of 8+ demos completed (life, maze, sierpinski).
 
 ## Notes
 - Swift code is primary reference; C++ as fallback

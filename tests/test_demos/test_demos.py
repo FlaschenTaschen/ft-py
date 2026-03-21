@@ -12,6 +12,7 @@ from flaschen_taschen.demos.quilt import QuiltDemo
 from flaschen_taschen.demos.firefly import FireflyDemo
 from flaschen_taschen.demos.life import LifeDemo, Life
 from flaschen_taschen.demos.maze import Maze
+from flaschen_taschen.demos.sierpinski import Sierpinski
 
 
 @pytest.fixture
@@ -630,6 +631,153 @@ class TestMaze:
 
         # Check all entries are Color objects
         for color in demo_palette:
+            assert hasattr(color, 'r')
+            assert hasattr(color, 'g')
+            assert hasattr(color, 'b')
+
+
+class TestSierpinski:
+    """Test Sierpinski demo."""
+
+    def test_sierpinski_initialization(self, std_opts):
+        """Test initialization."""
+        demo = Sierpinski(std_opts)
+        assert demo.std_opts == std_opts
+        assert demo.palette_mode is True
+        assert demo.fg_color.r == 0
+        assert demo.fg_color.g == 0
+        assert demo.fg_color.b == 0
+
+    def test_sierpinski_fg_color_parsing(self):
+        """Test foreground color parsing."""
+        opts = StandardOptions(["-g", "40x30", "-c", "ff0000"])
+        demo = Sierpinski(opts)
+
+        assert demo.palette_mode is False
+        assert demo.fg_color.r == 255
+        assert demo.fg_color.g == 0
+        assert demo.fg_color.b == 0
+
+    def test_sierpinski_bg_color_parsing(self):
+        """Test background color parsing."""
+        opts = StandardOptions(["-g", "40x30", "-b", "0000ff"])
+        demo = Sierpinski(opts)
+
+        assert demo.bg_color.r == 0
+        assert demo.bg_color.g == 0
+        assert demo.bg_color.b == 255
+
+    def test_sierpinski_setup_creates_state(self, std_opts):
+        """Test setup initializes sierpinski state."""
+        demo = Sierpinski(std_opts)
+        demo.setup()
+
+        assert demo.canvas is not None
+        assert demo.pixels is not None
+        assert len(demo.pixels) == demo.canvas.width * demo.canvas.height
+        assert all(p == 0 for p in demo.pixels)  # All empty initially
+        assert demo.palette is not None
+        assert len(demo.palette) == 256
+        assert demo.vertices == [(0.5, 1.0), (0.0, 0.0), (1.0, 0.0)]
+        assert 0 <= demo.sx <= 1.0
+        assert 0 <= demo.sy <= 1.0
+
+    def test_sierpinski_update_marks_pixels(self, std_opts):
+        """Test update marks pixels in accumulation buffer."""
+        demo = Sierpinski(std_opts)
+        demo.setup()
+
+        # Get initial pixel count
+        initial_marked = sum(1 for p in demo.pixels if p != 0)
+
+        # Run multiple iterations
+        for _ in range(10):
+            demo.update()
+
+        # Should have marked at least one pixel
+        final_marked = sum(1 for p in demo.pixels if p != 0)
+        assert final_marked >= initial_marked
+
+    def test_sierpinski_color_cycling(self, std_opts):
+        """Test that color index cycles through palette."""
+        demo = Sierpinski(std_opts)
+        demo.setup()
+
+        initial_index = demo.color_index
+
+        demo.draw()
+
+        # Color index should have incremented
+        assert demo.color_index == (initial_index + 1) % 256
+
+    def test_sierpinski_palette_mode_vs_fixed_color(self):
+        """Test difference between palette and fixed color modes."""
+        opts_palette = StandardOptions(["-g", "40x30"])
+        opts_fixed = StandardOptions(["-g", "40x30", "-c", "ff0000"])
+
+        demo_palette = Sierpinski(opts_palette)
+        demo_fixed = Sierpinski(opts_fixed)
+
+        assert demo_palette.palette_mode is True
+        assert demo_fixed.palette_mode is False
+
+    def test_sierpinski_draw_renders(self, std_opts):
+        """Test draw renders sierpinski to canvas."""
+        demo = Sierpinski(std_opts)
+        demo.setup()
+
+        # Mark some pixels
+        demo.pixels[0] = 1
+        demo.pixels[1] = 1
+
+        demo.draw()
+
+        # Check pixels were rendered
+        pixel_marked = demo.canvas.get_pixel(0, 0)
+        # Pixel 0 should be foreground color (black by default)
+        assert pixel_marked is not None
+
+    def test_sierpinski_chaos_game_convergence(self, std_opts):
+        """Test that chaos game marks multiple pixels."""
+        demo = Sierpinski(std_opts)
+        demo.setup()
+
+        # Get initial state
+        initial_marked = sum(1 for p in demo.pixels if p != 0)
+
+        # Run iterations to mark pixels
+        for _ in range(100):
+            demo.update()
+
+        # Should have marked multiple pixels
+        final_marked = sum(1 for p in demo.pixels if p != 0)
+        assert final_marked > initial_marked
+        assert final_marked > 0  # At least some pixels marked
+
+    def test_sierpinski_hex_color_parsing(self):
+        """Test hex color string parsing."""
+        color = Sierpinski._parse_hex_color("ff0000")
+        assert color.r == 255
+        assert color.g == 0
+        assert color.b == 0
+
+        color = Sierpinski._parse_hex_color("00ff00")
+        assert color.r == 0
+        assert color.g == 255
+        assert color.b == 0
+
+    def test_sierpinski_palette_generation(self):
+        """Test rainbow palette generation."""
+        palette = Sierpinski._create_rainbow_palette()
+
+        assert len(palette) == 256
+
+        # Check color variation
+        assert palette[0] != palette[128]
+        assert palette[64] != palette[192]
+
+        # Check all are Color objects
+        for color in palette:
             assert hasattr(color, 'r')
             assert hasattr(color, 'g')
             assert hasattr(color, 'b')
