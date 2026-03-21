@@ -1,51 +1,96 @@
-"""Simple animation demo: Animated moving shapes.
+"""Simple animation demo: Animated space invaders.
 
-Demonstrates time-based animation with shapes moving across the display.
-Pure Python with minimal CPU overhead.
+Demonstrates sprite-based animation with patterns moving across the display.
+Ported from ft-swift SimpleAnimationDemo.
 """
 
-import math
 from flaschen_taschen.client.color import Color
 from flaschen_taschen.demos import Demo, run_demo
 
 
+# Space invader patterns - '#' represents a pixel to draw
+INVADER_PATTERNS = [
+    [
+        "  #     #  ",
+        "   #   #   ",
+        "  #######  ",
+        " ## ### ## ",
+        "###########",
+        "# ####### #",
+        "# #     # #",
+        "  ##   ##  ",
+    ],
+    [
+        "  #     #  ",
+        "#  #   #  #",
+        "# ####### #",
+        "### ### ###",
+        " ######### ",
+        "  #######  ",
+        "  #     #  ",
+        " #       #",
+    ],
+]
+
+
 class SimpleAnimationDemo(Demo):
-    """Animate colored circles moving across the display."""
+    """Animate space invaders moving across the display."""
 
     def setup(self) -> None:
         """Initialize animation state."""
         super().setup()
-        self.time = 0.0
+        self.frame_count = 0
+        self.animation_x = 0
+        self.animation_y = 0
+        self.animation_direction = 1
+        self.update_counter = 0
 
     def update(self) -> None:
         """Update animation state."""
-        self.time += 0.016  # ~60 FPS step
+        self.update_counter += 1
+        # Update every ~300ms (assuming 10ms per update call)
+        # Adjust divisor based on actual frame timing
+        if self.update_counter >= 30:
+            self.update_counter = 0
+            self.frame_count += 1
+
+            # Update movement on even frames
+            if self.frame_count % 2 == 0:
+                self.animation_x += self.animation_direction
+
+                # Bounce logic
+                if self.animation_x > 20:
+                    self.animation_direction = -1
+                    self.animation_y += 1
+                if self.animation_x < 1:
+                    self.animation_direction = 1
+                    self.animation_y += 1
+
+                # Reset Y when at max
+                if self.animation_y >= 20:
+                    self.animation_y = 0
 
     def draw(self) -> None:
-        """Draw animated circles."""
+        """Draw animated space invader sprite."""
         assert self.canvas is not None
 
         self.canvas.clear(Color.BLACK)
 
-        # Multiple circles with different speeds
-        for i in range(3):
-            # X position cycles across screen
-            x = int((self.canvas.width * (self.time + i * 0.5)) % self.canvas.width)
-            # Y position cycles vertically with different frequency
-            y = int(
-                self.canvas.height // 2 +
-                (self.canvas.height // 4) * math.sin(self.time * (1 + i * 0.5))
-            )
+        # Select frame (alternates between two invader patterns)
+        frame_index = self.frame_count % len(INVADER_PATTERNS)
+        pattern = INVADER_PATTERNS[frame_index]
 
-            # Cycle through colors
-            colors = [Color.RED, Color.GREEN, Color.BLUE]
-            color = colors[i % len(colors)]
+        # Alternate colors: yellow and magenta
+        colors = [Color(255, 255, 0), Color(255, 0, 255)]
+        color = colors[frame_index % len(colors)]
 
-            # Draw circle (size 3)
-            for dx in range(-3, 4):
-                for dy in range(-3, 4):
-                    if dx*dx + dy*dy <= 9:  # Circle radius ~3
-                        self.canvas.set_pixel(x + dx, y + dy, color)
+        # Draw sprite from pattern
+        for dy, row in enumerate(pattern):
+            for dx, char in enumerate(row):
+                if char == "#":
+                    x = self.animation_x + dx
+                    y = self.animation_y + dy
+                    self.canvas.set_pixel(x, y, color)
 
 
 if __name__ == "__main__":

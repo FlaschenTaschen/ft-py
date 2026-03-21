@@ -91,6 +91,18 @@ class Canvas:
 
         self.dirty = True
 
+    def fill(self, color: Color):
+        """Fill the entire canvas with a color.
+
+        Args:
+            color: Color to fill with
+        """
+        for y in range(self.config.height):
+            for x in range(self.config.width):
+                self.pixels[y][x] = (color.r, color.g, color.b, 255)
+
+        self.dirty = True
+
     def fill_rect(self, x: int, y: int, width: int, height: int, color: Color):
         """Fill a rectangle with a color.
 

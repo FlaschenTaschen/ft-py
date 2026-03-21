@@ -1,7 +1,7 @@
-"""Simple example demo: Draw colored rectangles on the display.
+"""Simple example demo: Sets two static points on the display.
 
-Demonstrates basic canvas operations with static colored rectangles.
-Minimal CPU load, good for testing connectivity and frame rate.
+Red dot at (0,0) and blue dot at (5,5).
+Minimal demo for testing connectivity and basic canvas operations.
 """
 
 from flaschen_taschen.client.color import Color
@@ -9,32 +9,21 @@ from flaschen_taschen.demos import Demo, run_demo
 
 
 class SimpleExampleDemo(Demo):
-    """Draw colored rectangles in a simple grid pattern."""
+    """Set two static pixels on the display."""
 
     def update(self) -> None:
         """No animation, just static display."""
         pass
 
     def draw(self) -> None:
-        """Draw colored rectangles."""
+        """Set two pixels: red at (0,0) and blue at (5,5)."""
         assert self.canvas is not None
 
-        # Clear to black
-        self.canvas.clear(Color.BLACK)
+        # Set red pixel at (0,0)
+        self.canvas.set_pixel(0, 0, Color.RED)
 
-        # Draw colored rectangles
-        colors = [
-            (Color.RED, 0, 0),
-            (Color.GREEN, 10, 0),
-            (Color.BLUE, 20, 0),
-            (Color.YELLOW, 30, 0),
-            (Color.CYAN, 0, 10),
-            (Color.MAGENTA, 10, 10),
-            (Color.WHITE, 20, 10),
-        ]
-
-        for color, x, y in colors:
-            self.canvas.fill_rect(x, y, 9, 9, color)
+        # Set blue pixel at (5,5)
+        self.canvas.set_pixel(5, 5, Color.BLUE)
 
 
 if __name__ == "__main__":
