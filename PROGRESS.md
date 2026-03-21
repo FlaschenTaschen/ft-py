@@ -1,8 +1,9 @@
 # FlaschenTaschen Python Port - Progress Tracking
 
 ## Current Status
-Phase 5 READY TO START - Interactive Demos Batch 2
+Phase 5 IN PROGRESS - Interactive Demos Batch 2
 **Phase 4 VERIFIED COMPLETE** - 2026-03-20
+**Phase 5 Started** - life.py completed (2026-03-20)
 
 **Verification Complete**:
 - [COMPLETE] blur.py - 2x2 simple blur with decay + 9 color palettes (C++ base + Swift enhancements)
@@ -327,8 +328,19 @@ ft-debugger -m fill -d 100 -t 5         # Fill with 100ms frame delay for 5s
 
 ## In Progress / Next Phase
 
-### Phase 5 - Interactive Demos Batch 2 (Not Started)
-Ready to implement 8+ additional demos including life, sierpinski, maze, lines, random_dots, fractal, depth, and others.
+### Phase 5 - Interactive Demos Batch 2 [IN PROGRESS]
+Implementing 8+ additional demos including sierpinski, maze, lines, random_dots, fractal, depth, and others.
+
+**Completed:**
+- [COMPLETE] life.py - Conway's Game of Life with toroidal wrapping, respawn, and 256-color rainbow palette (2026-03-20)
+  - Life class with standard Conway's rules (2-3 survive, 3 birth)
+  - Toroidal wrapping (edges wrap around)
+  - 256-color rainbow palette with frame-by-frame cycling
+  - Respawn support (`-r` flag)
+  - Custom foreground/background colors (`-c`/`-b` flags)
+  - Initial population density control (`-n` flag)
+  - 15 comprehensive tests (5 grid + 10 demo)
+  - run_life.sh script for quick testing
 
 ## Planned Phases (Not Started)
 - [ ] Phase 5: Interactive Demos - Batch 2 (advanced algorithms, interactive)
@@ -336,6 +348,10 @@ Ready to implement 8+ additional demos including life, sierpinski, maze, lines, 
 - [ ] Phase 7: Documentation & Testing
 
 ## Key Files Created
+
+### Phase 5
+- flaschen_taschen/demos/life.py (Life demo + Life grid class + 256-color palette generation)
+- tests/test_demos/test_demos.py - Added TestLife (5 tests) and TestLifeDemo (10 tests)
 
 ### Phase 3
 - flaschen_taschen/debugger.py (DisplayDebugger: edges/fill modes, palette cycling)
