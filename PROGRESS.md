@@ -9,7 +9,7 @@ Phase 4 IN PROGRESS - Interactive Demos Batch 1
 - [REFACTORED] plasma.py - Pre-computed lookup tables + 3 sliding windows (from simple sine)
 - [REFACTORED] matrix.py - Simple green trails with white heads (from digit patterns)
 - [REFACTORED] quilt.py - Mirrored 8-pixel patterns with random colors (from seeded blocks)
-- [TODO] firefly.py - Needs refactoring (Swift has 8 patterns, Python is basic)
+- [COMPLETE] firefly.py - Needs refactoring (Swift has 8 patterns, Python is basic)
 - [VERIFY] simple_example.py
 - [VERIFY] simple_animation.py (sprite-based)
 - [VERIFY] black.py
