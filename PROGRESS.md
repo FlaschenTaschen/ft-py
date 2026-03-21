@@ -1,9 +1,58 @@
 # FlaschenTaschen Python Port - Progress Tracking
 
 ## Current Status
-Phase 2 COMPLETE - Content Generators (2026-03-20)
+Phase 3 COMPLETE - Debugger (2026-03-20)
 
 ## Completed Phases
+
+### Phase 3: Debugger [COMPLETE - 2026-03-20]
+**Deliverable**: Simple `ft-debugger` tool that cycles through colors while drawing edges or filling display
+
+**What was implemented:**
+1. **StandardOptions Class** (`standard_options.py`) - CRITICAL for Phase 4+
+   - Unified CLI option parsing for all demos
+   - Handles: `-h/--host`, `-g/--geometry`, `-l/--layer`, `-d/--delay`, `-t/--timeout`
+   - Returns parsed geometry (width, height, xoff, yoff) and other standard options
+   - All demos and tools will use this for consistency (matches Swift approach)
+
+2. **DisplayDebugger Class** (`debugger.py`)
+   - Two modes: EDGES (draw border) and FILL (fill entire display)
+   - Cycles through colors in a palette continuously
+   - Runs for specified timeout then exits
+   - Default 256-color HSV rainbow palette
+
+3. **CLI Tool** (`cli/ft_debugger.py`)
+   - Uses StandardOptions for standard args
+   - Additional args: `-m/--mode` (edges/fill), `-p/--palette` (rainbow/greyscale)
+   - Matches Swift implementation exactly
+   - No interactive menu
+
+3. **Test Suite** (13 new tests)
+   - DisplayDebugger tests (6 tests): init, edges/fill modes, palette handling
+   - CLI tests (7 tests): help, modes, geometry, delay, error handling
+
+4. **Wrapper Script** (`scripts/debugger.sh`)
+   - Simple shell script that runs the Python debugger
+   - Passes all arguments through
+
+**Key Features:**
+- Matches Swift ft-debugger behavior exactly
+- Cycles through palette colors while drawing
+- Non-interactive: just takes args and runs until timeout
+- Minimal code, no unnecessary features
+
+**Testing Results:**
+```
+✓ 13 new Phase 3 tests (all passing)
+✓ Core library + Phase 2 + Phase 3: ~110+ total tests
+```
+
+**Usage Examples:**
+```bash
+ft-debugger -m edges -t 10              # Draw edges for 10 seconds
+ft-debugger -m fill --palette rainbow   # Fill display
+ft-debugger -m fill -d 100 -t 5         # Fill with 100ms frame delay for 5s
+```
 
 ### Phase 2: Content Generators [COMPLETE - 2026-03-20]
 **Deliverable**: Text, image, and video generators with CLI tools
@@ -140,16 +189,22 @@ Phase 2 COMPLETE - Content Generators (2026-03-20)
 ```
 
 ## In Progress
-(none - Phase 2 complete)
+(none - Phase 3 complete)
 
 ## Planned Phases (Not Started)
-- [ ] Phase 3: Debugger (ft-debugger)
 - [ ] Phase 4: Interactive Demos - Batch 1 (simple examples, generative graphics)
 - [ ] Phase 5: Interactive Demos - Batch 2 (advanced algorithms, interactive)
 - [ ] Phase 6: Packaging & Distribution
 - [ ] Phase 7: Documentation & Testing
 
 ## Key Files Created
+
+### Phase 3
+- flaschen_taschen/debugger.py (DisplayDebugger: edges/fill modes, palette cycling)
+- flaschen_taschen/cli/ft_debugger.py (Simple CLI: -m, --palette, -t, -d, -g, -h args)
+- scripts/debugger.sh (Wrapper script)
+- tests/test_debugger.py (6 tests for DisplayDebugger)
+- tests/test_cli/test_ft_debugger.py (7 tests for CLI)
 
 ### Phase 1
 - flaschen_taschen/__init__.py

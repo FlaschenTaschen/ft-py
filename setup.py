@@ -18,6 +18,7 @@ setup(
             "send-text=flaschen_taschen.cli.send_text:main",
             "send-image=flaschen_taschen.cli.send_image:main",
             "send-video=flaschen_taschen.cli.send_video:main",
+            "ft-debugger=flaschen_taschen.cli.ft_debugger:main",
         ],
     },
     extras_require={

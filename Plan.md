@@ -100,6 +100,40 @@ ft-py/
 
 ```
 
+## Standard Options (Used by All Demos and Tools)
+
+All demos, generators, and tools use a unified `StandardOptions` class for consistent CLI behavior:
+
+```python
+from flaschen_taschen.standard_options import StandardOptions
+
+std_opts = StandardOptions(sys.argv[1:])
+
+# Available attributes:
+std_opts.hostname      # Display hostname (default: localhost)
+std_opts.width         # Display width (from geometry)
+std_opts.height        # Display height (from geometry)
+std_opts.xoff          # X offset (from geometry)
+std_opts.yoff          # Y offset (from geometry)
+std_opts.layer         # Layer 0-15 (default: 0)
+std_opts.delay         # Frame delay in milliseconds (default: 0)
+std_opts.timeout       # Timeout in seconds (default: 10)
+std_opts.non_standard_args  # Remaining args for tool-specific parsing
+```
+
+**Standard Arguments** (all demos support these):
+```
+-h, --host HOST           Display hostname/IP (default: localhost)
+-g, --geometry WxH[+X+Y]  Display geometry (default: 45x35)
+-l, --layer LAYER         Layer 0-15 (default: 0)
+-d, --delay MS            Frame delay in milliseconds (default: 0)
+-t, --timeout SECS        Timeout in seconds (default: 10)
+```
+
+**Tool-Specific Arguments**: Each tool adds additional args after parsing standard options.
+
+---
+
 ## Implementation Phases
 
 ### Phase 1: Core Library Foundation
@@ -199,14 +233,14 @@ ft-py/
 
 1. **Demo Framework** (`demos/__init__.py`)
    - Base `Demo` class with lifecycle methods:
-     - `__init__(args)` — parse geometry, host, layer, delay, timeout
+     - `__init__(std_opts)` — receive StandardOptions with standard args already parsed
      - `setup()` — initialize canvas and resources
      - `update()` — compute frame logic
      - `draw()` — render to canvas
      - `send()` — transmit frame
      - `cleanup()` — release resources
+   - Uses `StandardOptions` for consistent CLI arg handling (see above)
    - Entry point decorator for CLI discovery
-   - Argument parsing helpers
    - **Performance profiling hooks** for benchmarking on Raspberry Pi
    - **Frame rate control**: Adaptive delay to maintain target FPS without overloading RPi CPU
 
