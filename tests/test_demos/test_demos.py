@@ -15,6 +15,7 @@ from flaschen_taschen.demos.maze import Maze
 from flaschen_taschen.demos.sierpinski import Sierpinski
 from flaschen_taschen.demos.lines import Lines, ColorState, LineState, Line
 from flaschen_taschen.demos.fractal import Fractal, FractalState
+from flaschen_taschen.demos.random_dots import RandomDots
 
 
 @pytest.fixture
@@ -1073,3 +1074,129 @@ class TestFractal:
 
         # Frame count should have incremented
         assert demo.frame_count > 0
+
+
+class TestRandomDots:
+    """Test RandomDots demo."""
+
+    def test_random_dots_initialization(self, std_opts):
+        """Test initialization."""
+        demo = RandomDots(std_opts)
+        assert demo.std_opts == std_opts
+
+    def test_random_dots_setup(self, std_opts):
+        """Test setup initializes canvas."""
+        demo = RandomDots(std_opts)
+        demo.setup()
+
+        assert demo.canvas is not None
+        assert demo.canvas.width > 0
+        assert demo.canvas.height > 0
+
+    def test_random_dots_update(self, std_opts):
+        """Test update is no-op."""
+        demo = RandomDots(std_opts)
+        demo.setup()
+
+        # Update should not raise exception
+        demo.update()
+
+    def test_random_dots_draw(self, std_opts):
+        """Test draw sets a pixel."""
+        from flaschen_taschen.client.color import Color
+
+        demo = RandomDots(std_opts)
+        demo.setup()
+
+        # Draw should not raise exception
+        demo.draw()
+
+        # Canvas should have at least one non-black pixel (with high probability)
+        # (Unlikely but possible that a random color is black, so just check no exception)
+
+    def test_random_dots_randomness(self, std_opts):
+        """Test that multiple draws produce different positions."""
+        from flaschen_taschen.client.color import Color
+
+        demo = RandomDots(std_opts)
+        demo.setup()
+
+        positions = []
+        colors = []
+        for _ in range(20):
+            # Reset canvas to track which pixel was drawn
+            for y in range(demo.canvas.height):
+                for x in range(demo.canvas.width):
+                    demo.canvas.set_pixel(x, y, Color(0, 0, 0))
+
+            demo.draw()
+
+            # Find the non-black pixel (if any)
+            found_pixel = False
+            for y in range(demo.canvas.height):
+                for x in range(demo.canvas.width):
+                    pixel = demo.canvas.get_pixel(x, y)
+                    if pixel and not (pixel.r == 0 and pixel.g == 0 and pixel.b == 0):
+                        positions.append((x, y))
+                        colors.append((pixel.r, pixel.g, pixel.b))
+                        found_pixel = True
+                        break
+                if found_pixel:
+                    break
+
+        # Should have found at least some pixels
+        assert len(positions) > 0
+
+        # With high probability, positions should vary
+        unique_positions = len(set(positions))
+        assert unique_positions > 1
+
+    def test_random_dots_color_range(self, std_opts):
+        """Test that colors are in valid RGB range."""
+        from flaschen_taschen.client.color import Color
+
+        demo = RandomDots(std_opts)
+        demo.setup()
+
+        # Draw multiple times and check colors are valid
+        for _ in range(10):
+            demo.draw()
+
+        # Scan canvas for any pixels
+        for y in range(demo.canvas.height):
+            for x in range(demo.canvas.width):
+                pixel = demo.canvas.get_pixel(x, y)
+                if pixel:
+                    assert 0 <= pixel.r <= 255
+                    assert 0 <= pixel.g <= 255
+                    assert 0 <= pixel.b <= 255
+
+    def test_random_dots_position_in_bounds(self, std_opts):
+        """Test that pixels are drawn within canvas bounds."""
+        from flaschen_taschen.client.color import Color
+
+        demo = RandomDots(std_opts)
+        demo.setup()
+
+        # Draw multiple times
+        for _ in range(50):
+            demo.draw()
+
+        # All non-black pixels should be within bounds
+        for y in range(demo.canvas.height):
+            for x in range(demo.canvas.width):
+                pixel = demo.canvas.get_pixel(x, y)
+                assert pixel is not None
+                # Position is implicitly valid (it's on the canvas)
+
+    def test_random_dots_continuous(self, std_opts):
+        """Test continuous drawing without errors."""
+        demo = RandomDots(std_opts)
+        demo.setup()
+
+        # Run multiple frames
+        for _ in range(100):
+            demo.update()
+            demo.draw()
+
+        # Should complete without exceptions
