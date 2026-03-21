@@ -10,13 +10,12 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Ported to Python", email = "contact@example.com"}
+    {name = "FlaschenTaschen Contributors", email = "contact@example.com"}
 ]
 keywords = ["display", "led", "matrix", "flaschenTaschen"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -42,9 +41,9 @@ numpy = ["numpy>=1.20"]
 midi = ["mido>=1.2.9"]
 
 [project.urls]
-Homepage = "https://github.com/example/flaschen-taschen-py"
-Documentation = "https://github.com/example/flaschen-taschen-py/wiki"
-Repository = "https://github.com/example/flaschen-taschen-py"
+Homepage = "https://github.com/FlaschenTaschen/ft-py"
+Documentation = "https://github.com/FlaschenTaschen/ft-py/wiki"
+Repository = "https://github.com/FlaschenTaschen/ft-py"
 
 [tool.setuptools]
 packages = ["flaschen_taschen", "flaschen_taschen.client"]

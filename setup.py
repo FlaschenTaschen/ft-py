@@ -9,7 +9,7 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Ported to Python",
-    url="https://github.com/example/flaschen-taschen-py",
+    url="https://github.com/FlaschenTaschen/ft-py",
     packages=find_packages(),
     python_requires=">=3.8",
     install_requires=[],
