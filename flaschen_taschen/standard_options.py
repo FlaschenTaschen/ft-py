@@ -1,6 +1,7 @@
 """Standard command-line options shared across all demos and tools."""
 
 import argparse
+import os
 from typing import List, Optional
 
 
@@ -8,11 +9,11 @@ class StandardOptions:
     """Standard options parser for FlaschenTaschen demos.
 
     Handles common arguments:
-    - -h/--host: Display hostname/IP
+    - -h/--host: Display hostname/IP (default: FT_DISPLAY env var or localhost)
     - -g/--geometry: Display geometry (WxH[+X+Y])
-    - -l/--layer: Layer (0-15)
-    - -d/--delay: Frame delay (milliseconds)
-    - -t/--timeout: Timeout (seconds)
+    - -l/--layer: Layer (0-15) (default: 1)
+    - -d/--delay: Frame delay (milliseconds) (default: 50)
+    - -t/--timeout: Timeout (seconds) (default: 86400)
     """
 
     def __init__(self, args: Optional[List[str]] = None):
@@ -25,8 +26,8 @@ class StandardOptions:
 
         parser.add_argument(
             "-h", "--host",
-            default="localhost",
-            help="Display hostname/IP (default: localhost)"
+            default=None,
+            help="Display hostname/IP (default: FT_DISPLAY env var or localhost)"
         )
         parser.add_argument(
             "-g", "--geometry",
@@ -36,20 +37,20 @@ class StandardOptions:
         parser.add_argument(
             "-l", "--layer",
             type=int,
-            default=0,
-            help="Layer 0-15 (default: 0)"
+            default=1,
+            help="Layer 0-15 (default: 1)"
         )
         parser.add_argument(
             "-d", "--delay",
             type=int,
-            default=0,
-            help="Frame delay in milliseconds (default: 0)"
+            default=50,
+            help="Frame delay in milliseconds (default: 50)"
         )
         parser.add_argument(
             "-t", "--timeout",
             type=int,
-            default=10,
-            help="Timeout in seconds (default: 10)"
+            default=86400,
+            help="Timeout in seconds (default: 86400 = 24 hours)"
         )
 
         # Parse only known args, leaving rest for the tool
@@ -59,7 +60,7 @@ class StandardOptions:
         self._parse_geometry(parsed.geometry)
 
         # Store standard options
-        self.hostname = parsed.host
+        self.hostname = parsed.host or os.environ.get("FT_DISPLAY") or "localhost"
         self.layer = parsed.layer
         self.delay = parsed.delay
         self.timeout = parsed.timeout
