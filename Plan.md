@@ -15,9 +15,15 @@ Create a unified Python package (`flaschen-taschen-py`) that mirrors the Swift i
 - When context is cleared, PROGRESS.md is read to resume at the correct phase
 - User commits code changes to git; I never commit
 
-### Implementation Approach
+### Implementation Approach - CRITICAL DISCIPLINE REQUIRED
+- **READ SWIFT REFERENCE FIRST**: Before implementing ANY demo or feature:
+  1. Locate the corresponding `.swift` file in `~/Developer/FlaschenTaschen/ft-demos/Sources/FlaschenTaschenDemoKit/Demos/`
+  2. Read it completely to understand the exact algorithm, data structures, and behavior
+  3. Compare Python implementation against the Swift reference line-by-line
+  4. **DO NOT GUESS** at algorithms or behavior - follow the reference exactly
+  5. Document any differences between Swift and Python in comments if truly necessary
 - **Phased Development**: Implement and test one phase at a time; progress tracked in PROGRESS.md for context resumption
-- **Reference Code**: Use Swift port as primary reference (better organized, consistent CLI); fall back to C++ code when behavior unclear
+- **Reference Code**: Use Swift port as PRIMARY and AUTHORITATIVE reference (better organized, consistent CLI); fall back to C++ code only when Swift is unclear
 - **Testing**: Use existing Mac FT server app for validation; screenshots captured automatically during testing for debugging assistance
 - **Git Management**: User manages ALL git commits. **I will NEVER make any git commits.** Progress tracked in PROGRESS.md between context clears.
 - **Code Quality**: Include appropriate comments in code for review and ongoing development; update README.md after porting

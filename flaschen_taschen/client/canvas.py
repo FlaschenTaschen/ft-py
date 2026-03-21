@@ -196,7 +196,7 @@ class Canvas:
             rgb_pixels,
             x_offset=self.config.x_offset,
             y_offset=self.config.y_offset,
-            layer=0,  # Canvas uses single layer (compositing done client-side)
+            layer=self.config.layer,
         )
 
         # Send via connection

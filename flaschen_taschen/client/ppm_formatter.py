@@ -43,16 +43,16 @@ class PPMFormatter:
             if len(row) != width:
                 raise ValueError("All pixel rows must have same width")
 
-        # Build PPM header with FT metadata
+        # Build PPM header with FT metadata (order matters!)
         header = cls.PPM_MAGIC + b"\n"
+
+        # PPM image dimensions (must come before FT metadata)
+        dimensions = f"{width} {height}\n"
+        header += dimensions.encode("ascii")
 
         # FT metadata comment: #FT: <x> <y> <layer>
         ft_metadata = f"#FT: {x_offset} {y_offset} {layer}\n"
         header += ft_metadata.encode("ascii")
-
-        # PPM image dimensions
-        dimensions = f"{width} {height}\n"
-        header += dimensions.encode("ascii")
 
         # Max color value
         max_color = f"{cls.MAX_COLOR_VALUE}\n"

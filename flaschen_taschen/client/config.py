@@ -32,6 +32,7 @@ class Config:
         port=DEFAULT_PORT,
         frame_delay_ms=DEFAULT_FRAME_DELAY_MS,
         timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
+        layer=0,
     ):
         """Initialize configuration.
 
@@ -44,6 +45,7 @@ class Config:
             port: UDP port (default: 1337)
             frame_delay_ms: Delay between frames in milliseconds (default: 33)
             timeout_seconds: Socket timeout in seconds (default: 5)
+            layer: Layer 0-15 for display stacking (default: 0)
         """
         self.width = width
         self.height = height
@@ -53,6 +55,7 @@ class Config:
         self.port = port
         self.frame_delay_ms = frame_delay_ms
         self.timeout_seconds = timeout_seconds
+        self.layer = layer
 
     def validate(self):
         """Validate configuration values.
