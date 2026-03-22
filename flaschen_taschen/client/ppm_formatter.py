@@ -43,12 +43,16 @@ class PPMFormatter:
             if len(row) != width:
                 raise ValueError("All pixel rows must have same width")
 
-        # Build PPM header (standard format without metadata)
+        # Build PPM header with FT metadata in comment (matching C++ format)
         header = cls.PPM_MAGIC + b"\n"
 
         # PPM image dimensions
         dimensions = f"{width} {height}\n"
         header += dimensions.encode("ascii")
+
+        # FT metadata in header comment: #FT: x_offset y_offset layer
+        ft_comment = f"#FT: {x_offset} {y_offset} {layer}\n"
+        header += ft_comment.encode("ascii")
 
         # Max color value
         max_color = f"{cls.MAX_COLOR_VALUE}\n"
@@ -65,11 +69,7 @@ class PPMFormatter:
                 b = max(0, min(255, int(b)))
                 pixel_data += struct.pack("BBB", r, g, b)
 
-        # FT metadata footer: \n<x> <y> <layer>\n (matches Swift/C++ format)
-        ft_metadata = f"\n{x_offset} {y_offset} {layer}\n"
-        footer = ft_metadata.encode("ascii")
-
-        return header + pixel_data + footer
+        return header + pixel_data
 
     @classmethod
     def decode(cls, data: bytes) -> dict:
@@ -97,6 +97,7 @@ class PPMFormatter:
         header_lines_count = 0
         width = 0
         height = 0
+        ft_data = {"x_offset": 0, "y_offset": 0, "layer": 0}
 
         while pos < len(data) and not header_complete:
             # Skip whitespace
@@ -115,7 +116,22 @@ class PPMFormatter:
             if pos < len(data) and data[pos : pos + 1] in (b"\n", b"\r"):
                 pos += 1
 
-            # Skip comments in header
+            # Parse FT metadata from header comment
+            if line.startswith(b"#FT:"):
+                try:
+                    metadata_str = line[4:].decode("ascii").strip()
+                    parts = metadata_str.split()
+                    if len(parts) >= 3:
+                        ft_data = {
+                            "x_offset": int(parts[0]),
+                            "y_offset": int(parts[1]),
+                            "layer": int(parts[2]),
+                        }
+                except (ValueError, UnicodeDecodeError):
+                    pass
+                continue
+
+            # Skip other comments in header
             if line.startswith(b"#"):
                 continue
 
@@ -156,26 +172,8 @@ class PPMFormatter:
                 row.append((r, g, b))
             pixels.append(row)
 
-        # Parse metadata footer: \n<x> <y> <layer>\n (matches Swift/C++ format)
-        ft_data = {"x_offset": 0, "y_offset": 0, "layer": 0}
-        footer_start = pos + expected_pixel_bytes
-        if footer_start < len(data):
-            footer = data[footer_start:].decode("ascii", errors="ignore")
-            # Look for lines with three space-separated integers (not starting with #)
-            for line in footer.split("\n"):
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    try:
-                        parts = line.split()
-                        if len(parts) >= 3:
-                            ft_data = {
-                                "x_offset": int(parts[0]),
-                                "y_offset": int(parts[1]),
-                                "layer": int(parts[2]),
-                            }
-                            break
-                    except ValueError:
-                        continue
+        # Metadata is already parsed from header comments above
+        # (ft_data is initialized with defaults above)
 
         result = {
             "pixels": pixels,

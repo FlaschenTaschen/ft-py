@@ -1,5 +1,7 @@
 """Canvas abstraction for pixel rendering and frame management."""
 
+import os
+import socket
 import time
 from typing import Optional
 
@@ -7,6 +9,33 @@ from flaschen_taschen.client.color import Color
 from flaschen_taschen.client.config import Config
 from flaschen_taschen.client.ppm_formatter import PPMFormatter
 from flaschen_taschen.client.udp_client import DisplayConnection
+
+
+def _get_max_udp_size() -> int:
+    """Get the maximum UDP datagram size for this system.
+
+    Priority:
+    1. FT_UDP_SIZE environment variable (if set)
+    2. System SO_SNDBUF socket option (actual system limit)
+    3. Default fallback (65507)
+    """
+    # Check environment variable first
+    if 'FT_UDP_SIZE' in os.environ:
+        return int(os.environ['FT_UDP_SIZE'])
+
+    # Try to query system UDP limit via socket option
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            udp_size = s.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
+            return udp_size
+        finally:
+            s.close()
+    except Exception:
+        pass
+
+    # Fallback default
+    return 65507
 
 
 class Canvas:
@@ -229,7 +258,7 @@ class Canvas:
         """
         # Calculate how many rows fit in a single UDP packet
         # Reserve 64 bytes for header (matching C++ kFlaschenTaschenHeaderReserve)
-        max_udp_size = 65507
+        max_udp_size = _get_max_udp_size()
         header_reserve = 64
         row_size = 3 * self.config.width
         max_rows_per_packet = (max_udp_size - header_reserve) // row_size
@@ -374,7 +403,7 @@ class LayeredCanvas:
         rgb_pixels = [[(r, g, b) for r, g, b, _ in row] for row in pixels]
 
         # Calculate how many rows fit in a single UDP packet (matching C++ behavior)
-        max_udp_size = 65507
+        max_udp_size = _get_max_udp_size()
         header_reserve = 64
         row_size = 3 * self.config.width
         max_rows_per_packet = (max_udp_size - header_reserve) // row_size
